@@ -1,0 +1,18 @@
+api keys:
+login: https://mdashttpusertrigger.azurewebsites.net/api/login?code=3gl-Yy4DjSjYlQ9KxPIVGy5X9hKg425nqp86gSR5OyD5AzFu1FyQKQ%3D%3D
+get site list: https://mdashttpusertrigger.azurewebsites.net/api/GetSiteList?
+create site: https://mdashttpusertrigger.azurewebsites.net/api/CreateSite?
+assign site admin: https://mdashttpusertrigger.azurewebsites.net/api/AssignSiteAdmin?
+get org list: https://mdashttpusertrigger.azurewebsites.net/api/getOrganizationList?
+create org: https://mdashttpusertrigger.azurewebsites.net/api/CreateOrganization?
+assign org admin: https://mdashttpusertrigger.azurewebsites.net/api/assignOrgAdmin?
+get not approved pc list: https://mdashttpusertrigger.azurewebsites.net/api/GetNotApprovedPcList?
+approve pc: https://mdashttpusertrigger.azurewebsites.net/api/ApprovePc?code=R0kDA_YwTNWOuP2PJJc1KmM0LJBWWtVe0pe_8TQ0pz5FAzFumx8_OA%3D%3D
+get meter list: https://mdashttpusertrigger.azurewebsites.net/api/GetMeterList?
+get meter data: https://mdasanalyticshttptriggerfunctionapp.azurewebsites.net/api/getMeterData?
+get pc list: https://mdashttpusertrigger.azurewebsites.net/api/GetPcList?
+assign pc to site: https://mdashttpusertrigger.azurewebsites.net/api/assignPcToSite?code=TZreSyaXb0P7gT_UHwHgbEOecer4CLdKXekmJ-06N5IoAzFuqUNHiQ%3D%3D
+assign pc admin: https://mdashttpusertrigger.azurewebsites.net/api/assignPcAdmin?
+get org owner list: https://mdashttpusertrigger.azurewebsites.net/api/getOrgOwnerList?code=nDGY3WTI_DpAX1myxYoQ0fnkKtTI4ePa38fGfd9kR5bvAzFu6V7pXw%3D%3D
+create user: https://mdashttpusertrigger.azurewebsites.net/api/createuser?
+get user details by id: https://mdashttpusertrigger.azurewebsites.net/api/getUserDetails?code=Gj4EwGmOaf9ypzXP3cKjSR0ci1EOEpRfSXr_gUTFzo7dAzFupHHHXQ%3D%3D

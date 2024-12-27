@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        #qr-reader video {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #qr-reader__scan_region {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #qr-reader__scan_region>img {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-30"></div>
+    <!-- Navbar -->
+    <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200">
+        <div class="px-3 py-3 lg:px-5 lg:pl-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center justify-start">
+                    <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar"
+                        aria-controls="logo-sidebar" type="button"
+                        class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+                        <span class="sr-only">Open sidebar</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path clip-rule="evenodd" fill-rule="evenodd"
+                                d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+                            </path>
+                        </svg>
+                    </button>
+                    <span class="self-center text-xl font-semibold sm:text-2xl ml-2">Site Admin</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex items-center ml-3">
+                        <!-- Replace only the profile button/image, keeping all other elements intact -->
+                        <button onclick="handleLogout()"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2">
+                            <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span class="hidden md:inline">Logout</span>
+                        </button>
+                        <!-- User dropdown menu can be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- Sidebar -->
+    <aside id="logo-sidebar"
+        class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-indigo-800 sm:translate-x-0">
+        <!-- Your sidebar content -->
+        <div class="h-full px-3 pb-4 overflow-y-auto">
+            <ul class="space-y-2 font-medium">
+                <li>
+                    <a href="#" class="flex items-center p-2 text-white rounded-lg hover:bg-indigo-700 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                            </path>
+                        </svg>
+                        <span class="ml-3">Manage PC's</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 text-gray-300 rounded-lg hover:bg-indigo-700 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                        <span class="ml-3">Manage PC Admins</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 text-gray-300 rounded-lg hover:bg-indigo-700 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                        <span class="ml-3">View Reports</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="p-4 sm:ml-64">
+        <div class="p-4 mt-14">
+            <!-- Header -->
+            <div class="mb-8">
+                <div class="flex justify-between items-start">
+                    <div class="flex flex-col space-y-1">
+                        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Manage PC's</h1>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-gray-500 font-medium">Site Name:</span>
+                            <div class="flex items-center">
+                                <span id="org-name-label" class="text-gray-700">
+                                    <div class="animate-spin h-4 w-4">
+                                        <svg class="text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="add-site-btn"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2">
+                        <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span class="hidden md:inline">Add PC</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Total Sites Card -->
+                <div
+                    class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Total PCs</h3>
+                            <div class="flex items-center mt-2">
+                                <div class="text-3xl font-bold text-gray-900">24</div>
+                                <div class="flex items-center ml-2 text-purple-500 text-sm">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
+                                    </svg>
+                                    <span class="ml-1">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-purple-100 rounded-full">
+                            <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                            <div class="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
+                            All PCs monitored
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-between mb-4">
+
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Site State</h3>
+                            <div class="flex items-center mt-2">
+                                <div class="text-xl font-bold text-gray-900" id="active-sites">Active</div>
+                                <div
+                                    class="inline-flex items-center ml-2 px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                                    100%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-green-100 rounded-full">
+                            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                            No Issues Found
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Active Admins Card -->
+                <div
+                    class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Active Admins</h3>
+                            <div class="flex items-center mt-2">
+                                <div class="text-3xl font-bold text-gray-900">8</div>
+                                <div class="flex items-center ml-2 text-green-500 text-sm">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" />
+                                    </svg>
+                                    <span class="ml-1">+2 new</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-blue-100 rounded-full">
+                            <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                            2 new this month
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PC Active card -->
+
+            </div>
+            <!-- Pc Table -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-semibold">Pc Management</h2>
+
+                </div>
+                <div class="p-6">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200" id="pc-table">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Pc Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Pc Address</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Pc Admin</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+
+                                <!-- Dynamic data will go here -->
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div
+                                                class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Innovation Hub</div>
+                                                <div class="text-sm text-gray-500">ID: SITE001</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">123 Tech Park</div>
+                                        <div class="text-sm text-gray-500">Silicon Valley, CA 94043</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div
+                                                class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                                <span class="text-sm font-medium text-gray-600">JD</span>
+                                            </div>
+                                            <div class="ml-3">
+                                                <div class="text-sm font-medium text-gray-900">John Doe</div>
+                                                <div class="text-sm text-gray-500">john.doe@example.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">Approved</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div class="flex space-x-3">
+                                            <button class="text-indigo-600 hover:text-indigo-900 transition-colors">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button class="text-red-600 hover:text-red-900 transition-colors">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div
+                                                class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">AI Lab</div>
+                                                <div class="text-sm text-gray-500">ID: SITE002</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">456 AI Street</div>
+                                        <div class="text-sm text-gray-500">New York, NY 10001</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <button onclick="showAddAdminModal()"
+                                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2">
+                                            <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                            <span class="hidden md:inline">Add Admin</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-600">Pending</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div class="flex space-x-3">
+                                            <button class="text-indigo-600 hover:text-indigo-900 transition-colors">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button class="text-red-600 hover:text-red-900 transition-colors">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            </main>
+        </div>
+        </section>
+    </div>
+    </div>
+    <!-- Modal to Add Pc -->
+    <div id="add-pc-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden">
+        <div
+            class="bg-white rounded-lg shadow-xl w-[90%] md:max-w-md mx-4 max-h-[80vh] mt-16 overflow-y-auto scrollbar-hide">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold mb-6 text-gray-900">Add New Pc</h2>
+                <form id="add-pc-form" class="space-y-4">
+                    <div class="text-center">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">QR Code Scanner</h3>
+                        <p class="text-sm text-gray-500 mb-4">Scan the QR code to fetch PC information</p>
+                        <div id="qr-reader" class="w-full max-w-md mx-auto rounded-lg overflow-hidden"></div>
+                        <button type="button" id="btn-add-pc"
+                            class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                            Start Scanning
+                        </button>
+                    </div>
+                    <div>
+                        <label for="pc-name" class="block text-sm font-medium text-gray-700 mb-1">PC Name</label>
+                        <input type="text" id="pc-name"
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            readonly required />
+                    </div>
+                    <div>
+                        <label for="pc-address" class="block text-sm font-medium text-gray-700 mb-1">PC Address</label>
+                        <input type="text" id="pc-address"
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            readonly required />
+                    </div>
+                    <div class="flex gap-3 mt-6">
+                        <button type="button"
+                            class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+                            id="close-pc-modal-btn">Cancel</button>
+                        <button type="submit"
+                            class="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors">
+                            Add Pc
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Admin Modal -->
+    <div id="add-admin-modal"
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div
+            class="bg-white rounded-lg shadow-xl w-[95%] md:w-[75%] lg:w-[50%] xl:w-[40%] mx-4 max-h-[80vh] mt-16 overflow-y-auto scrollbar-hide">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Add New Admin</h2>
+                </div>
+
+                <form id="add-admin-form">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="admin-name" class="block text-sm font-medium text-gray-700">Admin Name</label>
+                            <input type="text" id="admin-name"
+                                class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                required />
+                        </div>
+                        <div>
+                            <label for="admin-email" class="block text-sm font-medium text-gray-700">Admin Email</label>
+                            <input type="email" id="admin-email"
+                                class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                required />
+                        </div>
+                        <div>
+                            <label for="admin-password" class="block text-sm font-medium text-gray-700">Admin
+                                Password</label>
+                            <input type="password" id="admin-password"
+                                class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                required />
+                        </div>
+                        <div>
+                            <label for="admin-mobile1" class="block text-sm font-medium text-gray-700">Mobile Number
+                                1</label>
+                            <input type="text" id="admin-mobile1"
+                                class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                required />
+                        </div>
+                        <div>
+                            <label for="admin-mobile2" class="block text-sm font-medium text-gray-700">Mobile Number 2
+                                (Optional)</label>
+                            <input type="text" id="admin-mobile2"
+                                class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500" />
+                        </div>
+                        <div>
+                            <label for="admin-address" class="block text-sm font-medium text-gray-700">Address</label>
+                            <input type="text" id="admin-address"
+                                class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                required />
+                        </div>
+                        <div>
+                            <label for="admin-gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                            <select id="admin-gender"
+                                class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                required>
+                                <option value="m">Male</option>
+                                <option value="f">Female</option>
+                                <option value="o">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" id="close-admin-modal-btn"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                            Add Admin
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script type="text/javascript" src="../assets/js/api.js"></script>
+    <script src="../assets/js/siteAdminDashboard.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        let html5QrcodeScanner = null;
+
+        function initializeScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+            }
+
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "qr-reader",
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    rememberLastUsedCamera: true,
+                    videoConstraints: {
+                        facingMode: "environment"
+                    }
+                }
+            );
+            const scanRegion = document.getElementById('qr-reader__scan_region');
+            if (scanRegion) {
+                scanRegion.style.display = 'flex';
+                scanRegion.style.alignItems = 'center';
+                scanRegion.style.justifyContent = 'center';
+            }
+        }
+
+        function startScanner() {
+            initializeScanner();
+            html5QrcodeScanner.render((decodedText, decodedResult) => {
+                // Success callback
+                try {
+                    const [pcName, pcAddress] = decodedText.split(',');
+                    document.getElementById('pc-name').value = pcName.trim();
+                    document.getElementById('pc-address').value = pcAddress.trim();
+
+                    // Stop scanning after successful scan
+                    html5QrcodeScanner.clear();
+
+                    // Show success message
+                    showNotification('PC details captured successfully', 'success');
+                } catch (error) {
+                    showNotification('Invalid QR code format', 'error');
+                }
+            }, (errorMessage) => {
+                // Error callback
+                console.error("QR Scanner Error:", errorMessage);
+            });
+        }
+
+        // Add event listener for the scan button
+        document.getElementById('btn-add-pc').addEventListener('click', () => {
+            startScanner();
+        });
+
+        // Clear scanner when modal is closed
+        function clearScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+            }
+        }
+
+        // Add this to your modal close event
+        document.getElementById('modal-close-button').addEventListener('click', clearScanner);
+    </script>
+
+</body>
+
+</html>

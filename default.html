@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./assets/css/index.css">
+</head>
+
+<body class="bg-white">
+    <div id="root">
+        <section id="auth" class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+            <div class="container mx-auto px-4 h-screen flex items-center justify-center">
+                <div class="bg-white rounded-xl shadow-2xl overflow-hidden max-w-4xl w-full">
+                    <div class="flex flex-col md:flex-row">
+                        <!-- Left Side - Branding -->
+                        <div class="bg-blue-600 p-8 md:w-1/2 flex flex-col justify-center">
+                            <div class="flex items-center mb-8"> <!-- Added flex and items-center classes -->
+                                <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4">
+                                    <!-- Added mr-4 for spacing -->
+                                    <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <h1 class="text-white text-3xl font-bold">Welcome Back!</h1> <!-- Removed mb-3 -->
+                            </div>
+                            <p class="text-blue-100 mb-8">Access your dashboard according to the role specified to you
+                                with enhanced security and
+                                control</p>
+                            <div class="space-y-4 text-blue-100">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Role-based access control</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Secure authentication</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Real-time monitoring</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Side - Login Form -->
+                        <div class="p-8 md:w-1/2">
+                            <div class="text-center mb-8">
+                                <h2 class="text-2xl font-bold text-gray-800">Login to Your Account</h2>
+                                <p class="text-gray-600 mt-2">Please enter your credentials to continue</p>
+                            </div>
+
+                            <form id="loginForm" class="space-y-6">
+                                <div class="space-y-2">
+                                    <label class="text-sm font-medium text-gray-700 block">Username or Email</label>
+                                    <input type="email" id="email" placeholder="Enter your email"
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                        required />
+                                </div>
+
+                                <div class="space-y-2 relative">
+                                    <label class="text-sm font-medium text-gray-700 block">Password</label>
+                                    <input type="password" id="password" placeholder="Enter your password"
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                        required />
+                                    <button type="button" id="togglePassword"
+                                        class="absolute inset-y-0 right-0 pr-3 flex items-bottom text-gray-500 h-full">
+                                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                            viewBox="0 0 20 20" fill="currentColor">
+                                            <path id="eyePath"
+                                                d="M10 2C5.58 2 1.73 4.61 0 8c1.73 3.39 5.58 6 10 6s8.27-2.61 10-6c-1.73-3.39-5.58-6-10-6zm0 10a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="remember"
+                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                                        <label for="remember" class="ml-2 block text-sm text-gray-700">Remember
+                                            me</label>
+                                    </div>
+                                    <a href="#" class="text-sm text-blue-600 hover:text-blue-500">Forgot password?</a>
+                                </div>
+                                <button type="submit"
+                                    class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                                    Sign In
+                                </button>
+                            </form>
+
+                            <div class="mt-6 text-center text-sm text-gray-600">
+                                <p>Need help? Contact your system administrator</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="overlay" class="hidden loading-overlay">
+        <div class="custom-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="loading-text">Loading...</div>
+        </div>
+    </div>
+    <script type="text/javascript" src="./assets/js/api.js"></script>
+    <script type="text/javascript" src="./assets/js/index.js"></script>
+</body>
+
+</html>

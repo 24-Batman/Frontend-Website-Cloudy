@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pc Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/flowbite@1.6.5/dist/flowbite.js"></script>
+    <style>
+        /* Custom scrollbar styling */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            /* Matches card's background */
+            border-radius: 4px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #a78bfa;
+            /* Matches card's purple accent */
+            border-radius: 4px;
+            border: 2px solid #f3f4f6;
+            /* Adds a border for a modern look */
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background-color: #7c3aed;
+            /* Darker purple for hover */
+        }
+
+        /* Hide scrollbar for non-WebKit browsers */
+        .custom-scroll {
+            scrollbar-width: thin;
+            /* Firefox: thin scrollbar */
+            scrollbar-color: #a78bfa #f3f4f6;
+            /* Thumb and track colors */
+        }
+    </style>
+
+</head>
+
+<body class="bg-gray-50">
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-30"></div>
+    <!-- Navbar -->
+    <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200">
+        <div class="px-3 py-3 lg:px-5 lg:pl-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center justify-start">
+                    <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar"
+                        aria-controls="logo-sidebar" type="button"
+                        class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+                        <span class="sr-only">Open sidebar</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path clip-rule="evenodd" fill-rule="evenodd"
+                                d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+                            </path>
+                        </svg>
+                    </button>
+                    <span class="self-center text-xl font-semibold sm:text-2xl ml-2">PC Admin</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex items-center ml-3">
+                        <!-- Replace only the profile button/image, keeping all other elements intact -->
+                        <button onclick="handleLogout()"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2">
+                            <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span class="hidden md:inline">Logout</span>
+                        </button>
+                        <!-- User dropdown menu can be added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside id="logo-sidebar"
+        class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-indigo-800 sm:translate-x-0">
+        <div class="h-full px-3 pb-4 overflow-y-auto">
+            <ul class="space-y-2 font-medium">
+                <li>
+                    <a href="#" class="flex items-center p-2 text-white rounded-lg hover:bg-indigo-700 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                            </path>
+                        </svg>
+                        <span class="ml-3">Manage Meters</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 text-gray-300 rounded-lg hover:bg-indigo-700 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                        <span class="ml-3">Meter Details</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 text-gray-300 rounded-lg hover:bg-indigo-700 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                        <span class="ml-3">Meter Reports</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="p-4 sm:ml-64">
+        <div class="p-4 mt-14">
+            <!-- Header -->
+            <div class="mb-8">
+                <div class="flex justify-between items-start">
+                    <div class="flex flex-col space-y-1">
+                        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Manage Meters</h1>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-gray-500 font-medium">Organization:</span>
+                            <div class="flex items-center">
+                                <span id="org-name-label" class="text-gray-700">
+                                    <div class="animate-spin h-4 w-4">
+                                        <svg class="text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                            viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <button id="add-site-btn"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2">
+                        <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span class="hidden md:inline">Add Site</span>
+                    </button> -->
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Total Sites Card -->
+                <div
+                    class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Current Site</h3>
+                            <div class="flex items-center mt-2">
+                                <div class="text-xl font-bold text-gray-900" id="active-sites">Research Center</div>
+                                <div class="flex items-center ml-2 text-green-500 text-sm">
+                                    <!-- <span class="hidden md:inline">5 of 10</span> -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-green-100 rounded-full">
+                            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                            All Sites Active
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Admins Card -->
+                <div
+                    class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Total Meters</h3>
+                            <div class="flex items-center mt-2">
+                                <div class="text-3xl font-bold text-gray-900">8</div>
+                                <div class="flex items-center ml-2 text-green-500 text-sm">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-blue-100 rounded-full">
+                            <i class='bx bx-bar-chart-square text-blue-500'
+                                style="font-size: 32px; line-height: 1;"></i>
+                        </div>
+
+
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                            All Meters Active
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Optional Third Card - You can add another metric here -->
+                <div
+                    class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Current PC</h3>
+                            <div class="flex items-center mt-2 relative">
+                                <!-- Custom Dropdown Wrapper -->
+                                <div class="relative bg-transparent text-3xl font-bold text-gray-900">
+                                    <select
+                                        class="appearance-none block w-full bg-transparent border-none focus:ring-0 focus:outline-none h-10 overflow-y-auto custom-scroll rounded-lg"
+                                        size="4">
+                                        <!-- Dropdown options -->
+                                        <option value="1">PC 1</option>
+                                        <option value="2">PC 2</option>
+                                        <option value="3">PC 3</option>
+                                        <option value="4">PC 4</option>
+                                        <option value="5">PC 5</option>
+                                        <option value="6">PC 6</option>
+                                        <option value="7">PC 7</option>
+                                        <option value="8">PC 8</option>
+                                        <option value="9">PC 9</option>
+                                        <option value="10">PC 10</option>
+                                        <option value="11">PC 11</option>
+                                        <option value="12">PC 12</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center ml-2 text-purple-500 text-sm">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
+                                    </svg>
+                                    <span class="ml-1">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-purple-100 rounded-full">
+                            <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                            <div class="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
+                            No issues found
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+            <!-- Table of Meters -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-semibold">Meter List</h2>
+                    <div class="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                        <input type="text" placeholder="Search Meter"
+                            class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto" />
+                        <button
+                            class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors w-full sm:w-auto">
+                            Filter
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200" id="meter-table">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Meter Num
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Meter Name
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Make
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Kw Avg
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        N Rec
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Status
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- Example Row 1 -->
+                                <tr class="hover:bg-gray-50 transition-colors" data-meter-id="MTR001">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">MTR001</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">PowerFlow</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">ABB</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">150</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">1000</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span
+                                            class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Healthy
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div class="flex space-x-3">
+                                            <button class="text-indigo-600 hover:text-indigo-900 transition-colors">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button class="text-red-600 hover:text-red-900 transition-colors">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Example Row 2 -->
+                                <tr class="hover:bg-gray-50 transition-colors" data-meter-id="MTR002">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">MTR002</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">EnergyPulse</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Siemens</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">200</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">850</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span
+                                            class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            Warning
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div class="flex space-x-3">
+                                            <button class="text-indigo-600 hover:text-indigo-900 transition-colors">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button class="text-red-600 hover:text-red-900 transition-colors">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Meter Modal -->
+<div id="meter-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full sm:w-3/4 lg:w-2/3 xl:w-1/2 h-full sm:h-auto overflow-auto max-h-screen">
+        <h2 class="text-2xl font-bold mb-2" id="modal-meter-num">Meter Num: Loading...</h2>
+        <h2 class="text-xl font-medium mb-4" id="modal-meter-name">Meter Name: Loading...</h2>
+
+        <!-- Status Section -->
+        <div class="mb-4">
+            <span id="meter-status" class="px-4 py-2 text-white bg-green-500 rounded-lg">Status: Active</span>
+        </div>
+
+        <!-- Time Range Filter -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 p-4">
+            <h2 class="text-lg font-semibold text-slate-800 mb-2">Analytics Overview</h2>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <input type="date" id="start-date" class="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none w-full sm:w-auto" placeholder="mm/dd/yyyy">
+                <select id="time-range" class="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none w-full sm:w-auto">
+                    <option value="1">Last 1 day</option>
+                    <option value="10">Last 10 days</option>
+                    <option value="30">Last 30 days</option>
+                </select>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Apply Filter</button>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Export Data</button>
+            </div>
+        </div>
+
+        <!-- Data Table for Modal -->
+        <div class="p-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border border-slate-200" id="modal-meter-table">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="px-4 py-2 text-slate-600">S. No</th>
+                            <th class="px-4 py-2 text-slate-600">Data Count</th>
+                            <th class="px-4 py-2 text-slate-600">Time Stamp</th>
+                            <th class="px-4 py-2 text-slate-600">V12</th>
+                            <th class="px-4 py-2 text-slate-600">V23</th>
+                            <th class="px-4 py-2 text-slate-600">V31</th>
+                            <th class="px-4 py-2 text-slate-600">I1</th>
+                            <th class="px-4 py-2 text-slate-600">I2</th>
+                            <th class="px-4 py-2 text-slate-600">I3</th>
+                            <th class="px-4 py-2 text-slate-600">Kw</th>
+                            <th class="px-4 py-2 text-slate-600">Kva</th>
+                            <th class="px-4 py-2 text-slate-600">Kvar</th>
+                            <th class="px-4 py-2 text-slate-600">Pf</th>
+                            <th class="px-4 py-2 text-slate-600">Hz</th>
+                            <th class="px-4 py-2 text-slate-600">Kwh</th>
+                            <th class="px-4 py-2 text-slate-600">Kvah</th>
+                            <th class="px-4 py-2 text-slate-600">P Flag</th>
+                            <th class="px-4 py-2 text-slate-600">L Flag</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200" id="modal-data-rows">
+                        <!-- Dynamic modal data content goes here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination for Modal -->
+            <div class="flex items-center justify-between mt-4">
+                <div class="text-sm text-slate-500" id="modal-pagination-info">
+                    Showing 1 to 10 of 100 entries
+                </div>
+                <div class="flex space-x-2" id="modal-pagination">
+                    <!-- Dynamic modal pagination buttons will go here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Rows per page dropdown -->
+        <div class="flex items-center space-x-4 mt-4">
+            <label for="rows-per-page" class="text-slate-700">Rows per page:</label>
+            <select id="rows-per-page" class="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+
+        <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded-md mt-4" id="close-meter-modal-btn">Back</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const rows = document.querySelectorAll('[data-meter-id]');
+        const modal = document.getElementById('meter-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const meterNum = document.getElementById('modal-meter-num');
+        const meterName = document.getElementById('modal-meter-name');
+
+        // When a row is clicked, open the modal
+        rows.forEach(row => {
+            row.addEventListener('click', () => {
+                const meterId = row.getAttribute('data-meter-id');
+                // Populate modal with details (can be extended with actual data)
+                meterNum.textContent = `Meter Num: ${meterId}`;
+                meterName.textContent = `Meter Name: ${row.cells[1].textContent}`;
+
+                modal.classList.remove('hidden');
+            });
+        });
+
+        // Close the modal when close button is clicked
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    });
+
+    // Sample data for testing
+    let sampleData = [
+        { id: 1, dataCount: 10, timestamp: '2024-12-01', v12: 120, v23: 110, v31: 130, i1: 5, i2: 4, i3: 6, kw: 10, kva: 15, kvar: 5, pf: 0.95, hz: 50, kwh: 100, kvah: 150, pFlag: 'Yes', lFlag: 'No' },
+        // Add more data rows for testing
+    ];
+    let currentPage = 1;
+    let rowsPerPage = 10;
+
+    // Function to Open Modal and Load Data
+    function openMeterModal(meterName, meterStatus, meterData) {
+        // Set Meter Info
+        document.getElementById('modal-meter-name').textContent = `Meter Num: ${meterName}`;
+        document.getElementById('modal-meter-status').textContent = `Meter Name: ${meterName}`;
+        document.getElementById('meter-status').textContent = `Status: ${meterStatus}`;
+
+        // Load Data Rows
+        loadDataTable(meterData);
+
+        // Show Modal
+        document.getElementById('meter-modal').classList.remove('hidden');
+    }
+
+    // Function to Load Data Rows in Modal
+    function loadDataTable(data) {
+        let start = (currentPage - 1) * rowsPerPage;
+        let end = start + rowsPerPage;
+        let dataToShow = data.slice(start, end);
+
+        let tableBody = document.getElementById('modal-data-rows');
+        tableBody.innerHTML = '';  // Clear existing rows
+
+        dataToShow.forEach((row, index) => {
+            let rowHTML = `
+                <tr>
+                    <td class="py-2 px-4">${start + index + 1}</td>
+                    <td class="py-2 px-4">${row.dataCount}</td>
+                    <td class="py-2 px-4">${row.timestamp}</td>
+                    <td class="py-2 px-4">${row.v12}</td>
+                    <td class="py-2 px-4">${row.v23}</td>
+                    <td class="py-2 px-4">${row.v31}</td>
+                    <td class="py-2 px-4">${row.i1}</td>
+                    <td class="py-2 px-4">${row.i2}</td>
+                    <td class="py-2 px-4">${row.i3}</td>
+                    <td class="py-2 px-4">${row.kw}</td>
+                    <td class="py-2 px-4">${row.kva}</td>
+                    <td class="py-2 px-4">${row.kvar}</td>
+                    <td class="py-2 px-4">${row.pf}</td>
+                    <td class="py-2 px-4">${row.hz}</td>
+                    <td class="py-2 px-4">${row.kwh}</td>
+                    <td class="py-2 px-4">${row.kvah}</td>
+                    <td class="py-2 px-4">${row.pFlag}</td>
+                    <td class="py-2 px-4">${row.lFlag}</td>
+                </tr>
+            `;
+            tableBody.insertAdjacentHTML('beforeend', rowHTML);
+        });
+
+        // Update Pagination
+        updatePagination(data.length);
+    }
+
+    // Function to Update Pagination
+    function updatePagination(totalRows) {
+        let totalPages = Math.ceil(totalRows / rowsPerPage);
+        let paginationInfo = document.getElementById('modal-pagination-info');
+        paginationInfo.textContent = `Showing ${(currentPage - 1) * rowsPerPage + 1} to ${Math.min(currentPage * rowsPerPage, totalRows)} of ${totalRows} entries`;
+
+        let pagination = document.getElementById('modal-pagination');
+        pagination.innerHTML = '';  // Clear existing pagination buttons
+
+        for (let i = 1; i <= totalPages; i++) {
+            let pageButton = document.createElement('button');
+            pageButton.textContent = i;
+            pageButton.classList.add('px-4', 'py-2', 'bg-gray-300', 'rounded-lg', 'hover:bg-primary/80');
+            pageButton.onclick = () => {
+                currentPage = i;
+                loadDataTable(sampleData);
+            };
+            pagination.appendChild(pageButton);
+        }
+    }
+
+    // Event Listener for Rows per page dropdown
+    document.getElementById('rows-per-page').addEventListener('change', function () {
+        rowsPerPage = parseInt(this.value);
+        loadDataTable(sampleData);
+    });
+
+    // Event Listener to close the modal
+    document.getElementById('close-meter-modal-btn').addEventListener('click', function () {
+        document.getElementById('meter-modal').classList.add('hidden');
+    });
+</script>
+
+            <script type="text/javascript" src="../assets/js/api.js"></script>
+            <script src="../assets/js/pcAdminDashboard.js"></script>
+</body>
+
+</html>
