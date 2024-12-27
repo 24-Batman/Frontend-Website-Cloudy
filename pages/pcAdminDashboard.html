@@ -40,6 +40,29 @@
             scrollbar-color: #a78bfa #f3f4f6;
             /* Thumb and track colors */
         }
+
+        .custom-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+        }
+        
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+        }
+        
+        .custom-scroll:hover::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.8);
+        }
     </style>
 
 </head>
@@ -287,7 +310,7 @@
                 </div>
                 <div class="p-6">
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200" id="meter-table">
+                        <table id="meter-table" class="min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -409,207 +432,92 @@
             </div>
             <!-- Meter Modal -->
 <div id="meter-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full sm:w-3/4 lg:w-2/3 xl:w-1/2 h-full sm:h-auto overflow-auto max-h-screen">
-        <h2 class="text-2xl font-bold mb-2" id="modal-meter-num">Meter Num: Loading...</h2>
-        <h2 class="text-xl font-medium mb-4" id="modal-meter-name">Meter Name: Loading...</h2>
-
-        <!-- Status Section -->
+    <div class="bg-white rounded-lg shadow-lg p-4 w-full max-w-6xl mx-4 my-4 sm:mx-auto max-h-[90vh] overflow-y-auto">
+        <!-- Header Section -->
         <div class="mb-4">
-            <span id="meter-status" class="px-4 py-2 text-white bg-green-500 rounded-lg">Status: Active</span>
+            <h2 class="text-2xl font-bold" id="modal-meter-num">Meter Num: Loading...</h2>
+            <h3 class="text-xl font-medium mb-2" id="modal-meter-name">Meter Name: Loading...</h3>
+            <span id="meter-status" class="px-3 py-1 text-sm text-white bg-green-500 rounded-full">Status: Active</span>
         </div>
 
-        <!-- Time Range Filter -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 p-4">
-            <h2 class="text-lg font-semibold text-slate-800 mb-2">Analytics Overview</h2>
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <input type="date" id="start-date" class="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none w-full sm:w-auto" placeholder="mm/dd/yyyy">
-                <select id="time-range" class="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none w-full sm:w-auto">
+        <!-- Analytics Overview Section -->
+        <div class="bg-gray-50 rounded-xl p-4 mb-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-3">Analytics Overview</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <input type="date" id="start-date" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Start Date">
+                <select id="time-range" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="0">None</option>
                     <option value="1">Last 1 day</option>
                     <option value="10">Last 10 days</option>
                     <option value="30">Last 30 days</option>
                 </select>
-                <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Apply Filter</button>
-                <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">Export Data</button>
+                <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
+                    <i class='bx bx-filter'></i>
+                    Apply Filter
+                </button>
+                <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                    <i class='bx bx-export'></i>
+                    Export Data
+                </button>
             </div>
         </div>
 
-        <!-- Data Table for Modal -->
-        <div class="p-4">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border border-slate-200" id="modal-meter-table">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="px-4 py-2 text-slate-600">S. No</th>
-                            <th class="px-4 py-2 text-slate-600">Data Count</th>
-                            <th class="px-4 py-2 text-slate-600">Time Stamp</th>
-                            <th class="px-4 py-2 text-slate-600">V12</th>
-                            <th class="px-4 py-2 text-slate-600">V23</th>
-                            <th class="px-4 py-2 text-slate-600">V31</th>
-                            <th class="px-4 py-2 text-slate-600">I1</th>
-                            <th class="px-4 py-2 text-slate-600">I2</th>
-                            <th class="px-4 py-2 text-slate-600">I3</th>
-                            <th class="px-4 py-2 text-slate-600">Kw</th>
-                            <th class="px-4 py-2 text-slate-600">Kva</th>
-                            <th class="px-4 py-2 text-slate-600">Kvar</th>
-                            <th class="px-4 py-2 text-slate-600">Pf</th>
-                            <th class="px-4 py-2 text-slate-600">Hz</th>
-                            <th class="px-4 py-2 text-slate-600">Kwh</th>
-                            <th class="px-4 py-2 text-slate-600">Kvah</th>
-                            <th class="px-4 py-2 text-slate-600">P Flag</th>
-                            <th class="px-4 py-2 text-slate-600">L Flag</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200" id="modal-data-rows">
-                        <!-- Dynamic modal data content goes here -->
-                    </tbody>
-                </table>
-            </div>
+        <!-- Table Section with invisible scrollbar -->
+        <div class="overflow-x-auto custom-scroll">
+            <table class="min-w-full divide-y divide-gray-200" id="modal-meter-table">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2 text-slate-600">S. No</th>
+                        <th class="px-4 py-2 text-slate-600">Data Count</th>
+                        <th class="px-4 py-2 text-slate-600">Time Stamp</th>
+                        <th class="px-4 py-2 text-slate-600">V12</th>
+                        <th class="px-4 py-2 text-slate-600">V23</th>
+                        <th class="px-4 py-2 text-slate-600">V31</th>
+                        <th class="px-4 py-2 text-slate-600">I1</th>
+                        <th class="px-4 py-2 text-slate-600">I2</th>
+                        <th class="px-4 py-2 text-slate-600">I3</th>
+                        <th class="px-4 py-2 text-slate-600">Kw</th>
+                        <th class="px-4 py-2 text-slate-600">Kva</th>
+                        <th class="px-4 py-2 text-slate-600">Kvar</th>
+                        <th class="px-4 py-2 text-slate-600">Pf</th>
+                        <th class="px-4 py-2 text-slate-600">Hz</th>
+                        <th class="px-4 py-2 text-slate-600">Kwh</th>
+                        <th class="px-4 py-2 text-slate-600">Kvah</th>
+                        <th class="px-4 py-2 text-slate-600">P Flag</th>
+                        <th class="px-4 py-2 text-slate-600">L Flag</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200" id="modal-data-rows">
+                    <!-- Dynamic modal data content goes here -->
+                </tbody>
+            </table>
+        </div>
 
-            <!-- Pagination for Modal -->
-            <div class="flex items-center justify-between mt-4">
-                <div class="text-sm text-slate-500" id="modal-pagination-info">
-                    Showing 1 to 10 of 100 entries
+        <!-- Footer Section -->
+        <div class="mt-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button id="close-meter-modal-btn" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Back
+                </button>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600">Rows per page:</span>
+                    <select id="rows-per-page" class="px-2 py-1 border rounded-lg text-sm">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
                 </div>
-                <div class="flex space-x-2" id="modal-pagination">
-                    <!-- Dynamic modal pagination buttons will go here -->
-                </div>
+            </div>
+            <div class="text-sm text-gray-500" id="modal-pagination-info">
+                Showing 1 to 10 of 100 entries
+            </div>
+            <div class="flex space-x-2" id="modal-pagination">
+                <!-- Pagination buttons will be inserted here -->
             </div>
         </div>
-
-        <!-- Rows per page dropdown -->
-        <div class="flex items-center space-x-4 mt-4">
-            <label for="rows-per-page" class="text-slate-700">Rows per page:</label>
-            <select id="rows-per-page" class="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-            </select>
-        </div>
-
-        <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded-md mt-4" id="close-meter-modal-btn">Back</button>
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const rows = document.querySelectorAll('[data-meter-id]');
-        const modal = document.getElementById('meter-modal');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-        const meterNum = document.getElementById('modal-meter-num');
-        const meterName = document.getElementById('modal-meter-name');
-
-        // When a row is clicked, open the modal
-        rows.forEach(row => {
-            row.addEventListener('click', () => {
-                const meterId = row.getAttribute('data-meter-id');
-                // Populate modal with details (can be extended with actual data)
-                meterNum.textContent = `Meter Num: ${meterId}`;
-                meterName.textContent = `Meter Name: ${row.cells[1].textContent}`;
-
-                modal.classList.remove('hidden');
-            });
-        });
-
-        // Close the modal when close button is clicked
-        closeModalBtn.addEventListener('click', () => {
-            modal.classList.add('hidden');
-        });
-    });
-
-    // Sample data for testing
-    let sampleData = [
-        { id: 1, dataCount: 10, timestamp: '2024-12-01', v12: 120, v23: 110, v31: 130, i1: 5, i2: 4, i3: 6, kw: 10, kva: 15, kvar: 5, pf: 0.95, hz: 50, kwh: 100, kvah: 150, pFlag: 'Yes', lFlag: 'No' },
-        // Add more data rows for testing
-    ];
-    let currentPage = 1;
-    let rowsPerPage = 10;
-
-    // Function to Open Modal and Load Data
-    function openMeterModal(meterName, meterStatus, meterData) {
-        // Set Meter Info
-        document.getElementById('modal-meter-name').textContent = `Meter Num: ${meterName}`;
-        document.getElementById('modal-meter-status').textContent = `Meter Name: ${meterName}`;
-        document.getElementById('meter-status').textContent = `Status: ${meterStatus}`;
-
-        // Load Data Rows
-        loadDataTable(meterData);
-
-        // Show Modal
-        document.getElementById('meter-modal').classList.remove('hidden');
-    }
-
-    // Function to Load Data Rows in Modal
-    function loadDataTable(data) {
-        let start = (currentPage - 1) * rowsPerPage;
-        let end = start + rowsPerPage;
-        let dataToShow = data.slice(start, end);
-
-        let tableBody = document.getElementById('modal-data-rows');
-        tableBody.innerHTML = '';  // Clear existing rows
-
-        dataToShow.forEach((row, index) => {
-            let rowHTML = `
-                <tr>
-                    <td class="py-2 px-4">${start + index + 1}</td>
-                    <td class="py-2 px-4">${row.dataCount}</td>
-                    <td class="py-2 px-4">${row.timestamp}</td>
-                    <td class="py-2 px-4">${row.v12}</td>
-                    <td class="py-2 px-4">${row.v23}</td>
-                    <td class="py-2 px-4">${row.v31}</td>
-                    <td class="py-2 px-4">${row.i1}</td>
-                    <td class="py-2 px-4">${row.i2}</td>
-                    <td class="py-2 px-4">${row.i3}</td>
-                    <td class="py-2 px-4">${row.kw}</td>
-                    <td class="py-2 px-4">${row.kva}</td>
-                    <td class="py-2 px-4">${row.kvar}</td>
-                    <td class="py-2 px-4">${row.pf}</td>
-                    <td class="py-2 px-4">${row.hz}</td>
-                    <td class="py-2 px-4">${row.kwh}</td>
-                    <td class="py-2 px-4">${row.kvah}</td>
-                    <td class="py-2 px-4">${row.pFlag}</td>
-                    <td class="py-2 px-4">${row.lFlag}</td>
-                </tr>
-            `;
-            tableBody.insertAdjacentHTML('beforeend', rowHTML);
-        });
-
-        // Update Pagination
-        updatePagination(data.length);
-    }
-
-    // Function to Update Pagination
-    function updatePagination(totalRows) {
-        let totalPages = Math.ceil(totalRows / rowsPerPage);
-        let paginationInfo = document.getElementById('modal-pagination-info');
-        paginationInfo.textContent = `Showing ${(currentPage - 1) * rowsPerPage + 1} to ${Math.min(currentPage * rowsPerPage, totalRows)} of ${totalRows} entries`;
-
-        let pagination = document.getElementById('modal-pagination');
-        pagination.innerHTML = '';  // Clear existing pagination buttons
-
-        for (let i = 1; i <= totalPages; i++) {
-            let pageButton = document.createElement('button');
-            pageButton.textContent = i;
-            pageButton.classList.add('px-4', 'py-2', 'bg-gray-300', 'rounded-lg', 'hover:bg-primary/80');
-            pageButton.onclick = () => {
-                currentPage = i;
-                loadDataTable(sampleData);
-            };
-            pagination.appendChild(pageButton);
-        }
-    }
-
-    // Event Listener for Rows per page dropdown
-    document.getElementById('rows-per-page').addEventListener('change', function () {
-        rowsPerPage = parseInt(this.value);
-        loadDataTable(sampleData);
-    });
-
-    // Event Listener to close the modal
-    document.getElementById('close-meter-modal-btn').addEventListener('click', function () {
-        document.getElementById('meter-modal').classList.add('hidden');
-    });
-</script>
 
             <script type="text/javascript" src="../assets/js/api.js"></script>
             <script src="../assets/js/pcAdminDashboard.js"></script>
