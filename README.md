@@ -8,4 +8,4 @@ Under development UI part of the project.
 - `public/` - Public assets
 - `package.json` - Project configuration
 
-mouli
+mouli is a good boy
