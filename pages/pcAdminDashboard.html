@@ -300,12 +300,12 @@
                 <div class="p-6 border-b border-gray-200 flex justify-between items-center">
                     <h2 class="text-xl font-semibold">Meter List</h2>
                     <div class="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
-                        <input type="text" placeholder="Search Meter"
+                        <input type="text" placeholder="Search Meter by Name"
                             class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto" />
-                        <button
+                        <!-- <button
                             class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors w-full sm:w-auto">
                             Filter
-                        </button>
+                        </button> -->
                     </div>
                 </div>
                 <div class="p-6">
@@ -521,6 +521,28 @@
 
             <script type="text/javascript" src="../assets/js/api.js"></script>
             <script src="../assets/js/pcAdminDashboard.js"></script>
+            <script>
+            document.querySelector('input[type="text"]').addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#meter-table tbody tr');
+                const noResults = document.getElementById('no-results');
+                let hasVisibleRows = false;
+                
+                rows.forEach(row => {
+                    const meterName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const isVisible = meterName.includes(query);
+                    row.style.display = isVisible ? '' : 'none';
+                    if (isVisible) hasVisibleRows = true;
+                });
+
+                // Show/hide the no results message
+                noResults.style.display = hasVisibleRows ? 'none' : 'block';
+                
+                // Hide/show the table based on results
+                const tableBody = document.querySelector('#meter-table tbody');
+                tableBody.style.display = hasVisibleRows ? '' : 'none';
+            });
+            </script>
 </body>
 
 </html>

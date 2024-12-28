@@ -7,186 +7,404 @@
     <title>Super Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/flowbite@1.6.5/dist/flowbite.js"></script>
+    <style>
+        /* Custom scrollbar hiding */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* Button and UI Enhancements */
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-primary {
+            background-color: #4f46e5; /* Indigo-600 */
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #4338ca; /* Indigo-700 */
+        }
+
+        .btn-secondary {
+            background-color: #f3f4f6; /* Gray-100 */
+            color: #374151; /* Gray-700 */
+        }
+
+        .btn-secondary:hover {
+            background-color: #e5e7eb; /* Gray-200 */
+        }
+
+        .btn-logout {
+            background-color: #e3342f; /* Red-600 */
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background-color: #cc1f1a; /* Red-700 */
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Mobile View Adjustments */
+        @media (max-width: 768px) {
+            #add-organization-btn {
+                display: block;
+                width: auto;
+                margin: 0 auto;
+                margin-top: 1rem;
+            }
+        }
+
+        .edit-btn {
+            background-color: transparent;
+            color: #4f46e5; /* Indigo-600 */
+            border: none;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background-color: transparent;
+            color: #e3342f; /* Red-600 */
+            border: none;
+            cursor: pointer;
+        }
+
+        .edit-btn:hover, .delete-btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
 </head>
 
-<body class="bg-white">
-    <div data-section-id="38dce8f0-fbd1-48f5-9715-d97663df8f2b" class="section-container">
-        <div id="root">
-            <section id="org_admin_dashboard" class="min-h-screen bg-gray-50">
-                <div class="flex">
-                    <!-- Sidebar -->
-                    <aside class="fixed inset-y-0 left-0 w-64 bg-indigo-800 text-white overflow-y-auto">
-                        <div class="p-6">
-                            <h2 class="text-lg font-semibold mb-8">Super Admin</h2>
-                            <nav class="space-y-2">
-                                <a href="#" class="flex items-center px-4 py-3 text-white bg-indigo-700 rounded-lg">
-                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
-                                        </path>
-                                    </svg>
-                                    Manage Organization Owner
-                                </a>
-                                <a href="#"
-                                    class="flex items-center px-4 py-3 text-gray-300 hover:bg-indigo-700 rounded-lg transition-colors">
-                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                                        </path>
-                                    </svg>
-                                    Manage Organization Owners
-                                </a>
-                                <a href="#"
-                                    class="flex items-center px-4 py-3 text-gray-300 hover:bg-indigo-700 rounded-lg transition-colors">
-                                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                                        </path>
-                                    </svg>
-                                    View Reports
-                                </a>
-                            </nav>
-                        </div>
-                    </aside>
-
-                    <!-- Main Content -->
-                    <main class="ml-64 flex-1 p-8">
-                        <!-- Header -->
-                        <header class="flex justify-between items-center mb-8">
-                            <div>
-                                <h1 class="text-2xl font-bold text-gray-900">Manage Organization Owners</h1>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <button
-                                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">Add
-                                    New Owner</button>
-                                <button
-                                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">Logout</button>
-                            </div>
-                        </header>
-
-                        <!-- Stats Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                            <div class="bg-white rounded-lg shadow p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-gray-500">Active Owners</h3>
-                                    <div class="p-2 bg-green-100 rounded-lg">
-                                        <i class='bx bx-user-check text-2xl text-green-500'></i>
-                                    </div>
-                                </div>
-                                <p class="text-2xl font-bold" id="active-owners">Loading...</p>
-                                <p class="text-green-500 text-sm">All owners active</p>
-                            </div>
-                        </div>
-
-                        <!-- Owner Table -->
-                        <div class="bg-white rounded-lg shadow">
-                            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-                                <h2 class="text-xl font-semibold">Owner Management</h2>
-                                <div class="flex space-x-2">
-                                    <input type="text" placeholder="Search owners..."
-                                        class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                                    <button
-                                        class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Filter</button>
-                                </div>
-                            </div>
-                            <div class="p-6">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full divide-y divide-gray-200" id="owners-table">
-                                        <thead>
-                                            <tr>
-                                                <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                                    Owner Name</th>
-                                                <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                                    Owner Email</th>
-                                                <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                                    Mobile Number 1</th>
-                                                <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                                    Owner Address</th>
-                                                <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                                    Subscription</th>
-                                                <th
-                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                                    Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-200">
-                                            <!-- Dynamic data will go here -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </main>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200">
+        <div class="px-3 py-3 lg:px-5 lg:pl-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center justify-start">
+                    <button data-drawer-target="drawer-navigation" data-drawer-toggle="drawer-navigation"
+                        aria-controls="drawer-navigation" type="button"
+                        class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+                        <span class="sr-only">Open sidebar</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path clip-rule="evenodd" fill-rule="evenodd"
+                                d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+                            </path>
+                        </svg>
+                    </button>
+                    <span class="self-center text-xl font-semibold sm:text-2xl ml-2">Super Admin</span>
                 </div>
-            </section>
+                <div class="flex items-center">
+                    <div class="flex items-center ml-3">
+                        <button onclick="handleLogout()"
+                            class="btn btn-logout flex items-center space-x-2">
+                            <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span class="hidden md:inline">Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </nav>
+
+    <!-- Responsive Sidebar -->
+    <aside id="drawer-navigation" 
+        class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-indigo-800 sm:translate-x-0">
+        <div class="h-full px-3 pb-4 overflow-y-auto">
+            <ul class="space-y-2 font-medium">
+                <li>
+                    <a href="#" class="flex items-center p-2 text-white rounded-lg hover:bg-indigo-700 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                            </path>
+                        </svg>
+                        Manage Organization Owner
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center p-2 text-white rounded-lg hover:bg-indigo-700 group">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                        View Reports
+                    </a>
+                </li>
+                <!-- ... other sidebar items ... -->
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="sm:ml-64 p-4">
+        <div class="p-4 mt-14">
+            <!-- Header -->
+            <div class="mb-8">
+                <div class="flex justify-between items-start">
+                    <div class="flex flex-col space-y-1">
+                        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Manage Organization Owners</h1>
+                    </div>
+                    <button id="add-owner-btn"
+                        class="btn btn-primary flex items-center space-x-2">
+                        <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span class="hidden md:inline">Add Owner</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Card 1 -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Total Sites</h3>
+                            <div class="flex items-center mt-2">
+                                <div class="text-xl font-bold text-gray-900" id="active-sites">Loading...</div>
+                                <div class="flex items-center ml-2 text-green-500 text-sm">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"></path>
+                                    </svg>
+                                    <span class="ml-1">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-orange-100 rounded-full">
+                            <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                            All Sites active
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Active Owners</h3>
+                            <div class="flex items-center mt-2">
+                                <div class="text-xl font-bold text-gray-900" id="active-owners">15</div>
+                                <div class="flex items-center ml-2 text-green-500 text-sm">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z"></path>
+                                    </svg>
+                                    <span class="ml-1">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-green-100 rounded-full">
+                            <i class='bx bx-user-check text-2xl text-green-500'></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center mt-4">
+                        <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                            All owners active
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add more cards as needed -->
+            </div>
+
+            <!-- Owner Table -->
+            <div class="card">
+                <div class="p-4 md:p-6 border-b border-gray-200 flex flex-col md:flex-row justify-between items-center">
+                    <h2 class="text-xl font-semibold mb-4 md:mb-0">Owner Management</h2>
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 w-full md:w-auto">
+                        <input type="text" placeholder="Search owners..."
+                            class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-auto" />
+                        <button class="btn btn-secondary">
+                            Filter
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4 md:p-6 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200" id="owners-table">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Organization</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Owner Password</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alter</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr onclick="showOrgDetails('Arun', 'Tech Corp')" class="cursor-pointer">
+                                <td class="px-6 py-4 whitespace-nowrap">1</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Arun</td>
+                                <td class="px-6 py-4 whitespace-nowrap">arun@mail.com</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Tech Corp</td>
+                                <td class="px-6 py-4 whitespace-nowrap">********</td>
+                                <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
+                                    <button class="edit-btn"><i class='bx bx-pencil'></i></button>
+                                    <button class="delete-btn"><i class='bx bx-trash'></i></button>
+                                </td>
+                            </tr>
+                            <tr onclick="showOrgDetails('Karthik', 'Mars Industries')" class="cursor-pointer">
+                                <td class="px-6 py-4 whitespace-nowrap">2</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Karthik</td>
+                                <td class="px-6 py-4 whitespace-nowrap">karthik@mail.com</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Mars Industries</td>
+                                <td class="px-6 py-4 whitespace-nowrap">********</td>
+                                <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
+                                    <button class="edit-btn"><i class='bx bx-pencil'></i></button>
+                                    <button class="delete-btn"><i class='bx bx-trash'></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
     <!-- Modal to Add Owner -->
-    <div id="add-owner-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-1/3">
+    <div id="add-owner-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full md:w-2/3 lg:w-1/3 mx-4 max-h-[90vh] overflow-y-auto">
             <h2 class="text-2xl font-bold mb-4">Add New Owner</h2>
-            <form id="add-owner-form">
-                <div class="mb-4">
+            <form id="add-owner-form" class="space-y-4">
+                <div>
                     <label for="owner-name" class="block text-sm font-medium text-gray-700">Owner Name</label>
-                    <input type="text" id="owner-name"
-                        class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        required />
+                    <input type="text" id="owner-name" class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
                 </div>
-                <div class="mb-4">
+                <div>
                     <label for="owner-email" class="block text-sm font-medium text-gray-700">Owner Email</label>
-                    <input type="email" id="owner-email"
-                        class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        required />
+                    <input type="email" id="owner-email" class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
                 </div>
-                <div class="mb-4">
+                <div>
                     <label for="owner-password" class="block text-sm font-medium text-gray-700">Owner Password</label>
-                    <input type="text" id="owner-password"
-                        class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        required />
+                    <input type="text" id="owner-password" class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
                 </div>
-                <div class="mb-4">
+                <div>
                     <label for="owner-mobile1" class="block text-sm font-medium text-gray-700">Mobile Number 1</label>
-                    <input type="text" id="owner-mobile1"
-                        class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        required />
+                    <input type="text" id="owner-mobile1" class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
                 </div>
-                <div class="mb-4">
-                    <label for="owner-mobile2" class="block text-sm font-medium text-gray-700">Mobile Number 2</label>
-                    <input type="text" id="owner-mobile2"
-                        class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                </div>
-                <div class="mb-4">
+                <div>
                     <label for="owner-address" class="block text-sm font-medium text-gray-700">Address</label>
-                    <input type="text" id="owner-address"
-                        class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        required />
+                    <input type="text" id="owner-address" class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
                 </div>
-                <div class="mb-4">
+                <div>
+                    <label for="owner-organization" class="block text-sm font-medium text-gray-700">Organization</label>
+                    <input type="text" id="owner-organization" class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+                </div>
+                <div>
                     <label for="owner-gender" class="block text-sm font-medium text-gray-700">Gender</label>
-                    <select id="owner-gender"
-                        class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        required>
+                    <select id="owner-gender" class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                         <option value="m">Male</option>
                         <option value="f">Female</option>
                         <option value="o">Other</option>
                     </select>
                 </div>
-                <div class="flex justify-end space-x-2">
-                    <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded-md"
-                        id="close-modal-btn">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md">Add Owner</button>
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" class="btn btn-secondary" id="close-owner-modal-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Owner</button>
                 </div>
             </form>
         </div>
     </div>
+
+    <!-- Organization Details Card -->
+    <div id="org-details-card" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full md:w-2/3 lg:w-1/3 mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-4">Organization Details</h2>
+            <div id="org-details-content" class="space-y-4">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            <div class="flex justify-end space-x-2 pt-4">
+                <button type="button" class="btn btn-secondary" onclick="closeOrgDetails()">Close</button>
+                <button type="button" class="btn btn-primary">Edit</button>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript" src="../assets/js/api.js"></script>
     <script src="../assets/js/superAdminDashboard.js"></script>
+    <script>
+        // JavaScript to handle modal display and form submission
+        document.getElementById('add-owner-btn').addEventListener('click', function() {
+            document.getElementById('add-owner-modal').classList.remove('hidden');
+        });
+
+        document.getElementById('close-owner-modal-btn').addEventListener('click', function() {
+            document.getElementById('add-owner-modal').classList.add('hidden');
+        });
+
+        document.getElementById('add-owner-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const ownerName = document.getElementById('owner-name').value;
+            const ownerEmail = document.getElementById('owner-email').value;
+            const ownerPassword = document.getElementById('owner-password').value;
+            const ownerMobile1 = document.getElementById('owner-mobile1').value;
+            const ownerAddress = document.getElementById('owner-address').value;
+            const ownerOrganization = document.getElementById('owner-organization').value;
+            const ownerGender = document.getElementById('owner-gender').value;
+
+            // Show the organization details card with the form data
+            showOrgDetails(ownerName, ownerEmail, ownerPassword, ownerMobile1, ownerAddress, ownerOrganization, ownerGender);
+
+            // Hide the modal
+            document.getElementById('add-owner-modal').classList.add('hidden');
+        });
+
+        function showOrgDetails(name, email, password, mobile, address, organization, gender) {
+            const detailsContent = document.getElementById('org-details-content');
+            detailsContent.innerHTML = `
+                <p><strong>Owner Name:</strong> ${name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Password:</strong> ${password}</p>
+                <p><strong>Mobile Number:</strong> ${mobile}</p>
+                <p><strong>Address:</strong> ${address}</p>
+                <p><strong>Organization:</strong> ${organization}</p>
+                <p><strong>Gender:</strong> ${gender}</p>
+            `;
+            document.getElementById('org-details-card').classList.remove('hidden');
+        }
+
+        function closeOrgDetails() {
+            document.getElementById('org-details-card').classList.add('hidden');
+        }
+    </script>
 </body>
 
 </html>
