@@ -1,3 +1,349 @@
+// Sample data for organizations with color variations
+const sampleOrganizations = [
+    {
+        id: "ORG001",
+        name: "Tech Solutions Inc",
+        address: "123 Business Park",
+        city: "Chennai, TN 600001",
+        admin: {
+            name: "Rahul Singh",
+            email: "rahul.s@techsolutions.com",
+            initials: "RS"
+        },
+        status: "Active",
+        iconColor: "blue" // Color theme for this org
+    },
+    {
+        id: "ORG002",
+        name: "Digital Dynamics",
+        address: "456 Tech Avenue",
+        city: "Bangalore, KA 560001",
+        admin: null,
+        status: "Pending",
+        iconColor: "purple" // Different color theme
+    },
+    {
+        id: "ORG003",
+        name: "Global Systems Ltd",
+        address: "789 Innovation Road",
+        city: "Mumbai, MH 400001",
+        admin: {
+            name: "Priya Patel",
+            email: "priya.p@globalsystems.com",
+            initials: "PP"
+        },
+        status: "Active",
+        iconColor: "green" // Different color theme
+    },
+    {
+        id: "ORG004",
+        name: "Future Technologies",
+        address: "321 Smart Street",
+        city: "Hyderabad, TS 500001",
+        admin: {
+            name: "Arun Kumar",
+            email: "arun.k@futuretech.com",
+            initials: "AK"
+        },
+        status: "Active",
+        iconColor: "indigo" // Different color theme
+    },
+    {
+        id: "ORG005",
+        name: "Innovate Solutions",
+        address: "567 Innovation Hub",
+        city: "Pune, MH 411001",
+        admin: {
+            name: "Sneha Reddy",
+            email: "sneha.r@innovatesolutions.com",
+            initials: "SR"
+        },
+        status: "Active",
+        iconColor: "blue"
+    },
+    {
+        id: "ORG006",
+        name: "CloudTech Systems",
+        address: "890 Cloud Avenue",
+        city: "Delhi, DL 110001",
+        admin: null,
+        status: "Pending",
+        iconColor: "purple"
+    },
+    {
+        id: "ORG007",
+        name: "DataCore Analytics",
+        address: "234 Data Street",
+        city: "Kolkata, WB 700001",
+        admin: {
+            name: "Vikram Mehta",
+            email: "vikram.m@datacore.com",
+            initials: "VM"
+        },
+        status: "Active",
+        iconColor: "green"
+    },
+    {
+        id: "ORG008",
+        name: "Smart Enterprise",
+        address: "678 Smart City",
+        city: "Ahmedabad, GJ 380001",
+        admin: {
+            name: "Neha Shah",
+            email: "neha.s@smartenterprise.com",
+            initials: "NS"
+        },
+        status: "Active",
+        iconColor: "indigo"
+    },
+    {
+        id: "ORG009",
+        name: "AI Research Labs",
+        address: "901 Research Park",
+        city: "Gurgaon, HR 122001",
+        admin: null,
+        status: "Pending",
+        iconColor: "blue"
+    },
+    {
+        id: "ORG010",
+        name: "Quantum Computing",
+        address: "345 Quantum Road",
+        city: "Noida, UP 201301",
+        admin: {
+            name: "Rajesh Kumar",
+            email: "rajesh.k@quantumcomp.com",
+            initials: "RK"
+        },
+        status: "Active",
+        iconColor: "purple"
+    }
+];
+
+// Toast notification system
+const toastTypes = {
+    SUCCESS: 'success',
+    ERROR: 'error',
+    WARNING: 'warning'
+};
+
+function showToast(message, type = toastTypes.SUCCESS) {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+
+    // Set base classes
+    toast.className = `transform transition-all duration-300 ease-in-out flex items-center p-4 mb-3 rounded-lg shadow-lg max-w-xs translate-x-0`;
+
+    // Configure toast based on type
+    let iconSvg = '';
+    switch (type) {
+        case toastTypes.SUCCESS:
+            toast.classList.add('bg-green-500', 'text-white');
+            iconSvg = `
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>`;
+            break;
+        case toastTypes.ERROR:
+            toast.classList.add('bg-red-500', 'text-white');
+            iconSvg = `
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>`;
+            break;
+        case toastTypes.WARNING:
+            toast.classList.add('bg-yellow-500', 'text-white');
+            iconSvg = `
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>`;
+            break;
+    }
+
+    toast.innerHTML = `
+        <div class="flex items-center">
+            ${iconSvg}
+            <span class="text-sm font-medium">${message}</span>
+        </div>
+        <button class="ml-auto -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex h-8 w-8 text-white hover:bg-opacity-25 focus:outline-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    `;
+
+    // Add toast to container
+    toastContainer.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.classList.add('translate-x-0', 'opacity-100');
+    });
+
+    // Add click handler to close button
+    const closeButton = toast.querySelector('button');
+    closeButton.addEventListener('click', () => removeToast(toast));
+
+    // Auto remove after 3 seconds
+    setTimeout(() => removeToast(toast), 3000);
+}
+
+function removeToast(toast) {
+    toast.classList.add('opacity-0', 'translate-x-full');
+    setTimeout(() => toast.remove(), 300);
+}
+
+function showToast(message, type = toastTypes.SUCCESS) {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+
+    // Set base classes
+    toast.className = `transform transition-all duration-300 ease-in-out flex items-center p-4 mb-3 rounded-lg shadow-lg max-w-xs translate-x-0`;
+
+    // Configure toast based on type
+    let iconSvg = '';
+    switch (type) {
+        case toastTypes.SUCCESS:
+            toast.classList.add('bg-green-500', 'text-white');
+            iconSvg = `
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>`;
+            break;
+        case toastTypes.ERROR:
+            toast.classList.add('bg-red-500', 'text-white');
+            iconSvg = `
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>`;
+            break;
+        case toastTypes.WARNING:
+            toast.classList.add('bg-yellow-500', 'text-white');
+            iconSvg = `
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>`;
+            break;
+    }
+
+    toast.innerHTML = `
+        <div class="flex items-center">
+            ${iconSvg}
+            <span class="text-sm font-medium">${message}</span>
+        </div>
+        <button class="ml-auto -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex h-8 w-8 text-white hover:bg-opacity-25 focus:outline-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    `;
+
+    // Add toast to container
+    toastContainer.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.classList.add('translate-x-0', 'opacity-100');
+    });
+
+    // Add click handler to close button
+    const closeButton = toast.querySelector('button');
+    closeButton.addEventListener('click', () => removeToast(toast));
+
+    // Auto remove after 3 seconds
+    setTimeout(() => removeToast(toast), 3000);
+}
+
+// Function to get color classes based on the organization's color theme
+function getColorClasses(color) {
+    const colorMap = {
+        blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
+        purple: { bg: 'bg-purple-100', text: 'text-purple-600' },
+        green: { bg: 'bg-green-100', text: 'text-green-600' },
+        indigo: { bg: 'bg-indigo-100', text: 'text-indigo-600' }
+    };
+    return colorMap[color] || colorMap.blue; // Default to blue if color not found
+}
+
+// Function to render the organizations table
+function renderOrganizationsTable() {
+    const tableContainer = document.querySelector('#org-table').parentElement;
+    const tableBody = document.querySelector('#org-table tbody');
+    if (!tableBody) return;
+
+    // Set fixed height for table container to show exactly 3 rows
+    tableContainer.classList.add('max-h-[260px]', 'overflow-y-auto', 'scrollbar-hide');
+
+    tableBody.innerHTML = ''; // Clear existing content
+
+    sampleOrganizations.forEach(org => {
+        const colors = getColorClasses(org.iconColor);
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 transition-colors';
+
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 ${colors.bg} rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 ${colors.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900">${org.name}</div>
+                        <div class="text-sm text-gray-500">ID: ${org.id}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">${org.address}</div>
+                <div class="text-sm text-gray-500">${org.city}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                ${org.admin ? `
+                    <div class="flex items-center">
+                        <div class="h-8 w-8 rounded-full ${colors.bg} flex items-center justify-center">
+                            <span class="text-sm font-medium ${colors.text}">${org.admin.initials}</span>
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-sm font-medium text-gray-900">${org.admin.name}</div>
+                            <div class="text-sm text-gray-500">${org.admin.email}</div>
+                        </div>
+                    </div>
+                ` : `
+                    <button onclick="showAddAdminModal()"
+                        class="px-4 py-2 ${colors.bg} ${colors.text} rounded-lg hover:bg-opacity-75 transition-colors flex items-center space-x-2">
+                        <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span class="hidden md:inline">Add Admin</span>
+                    </button>
+                `}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm ${org.status === 'Active' ? 'text-green-600' : 'text-yellow-600'}">${org.status}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <div class="flex space-x-3">
+                    <button class="${colors.text} hover:${colors.text}-dark transition-colors">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                    </button>
+                    <button class="text-red-600 hover:text-red-900 transition-colors">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        `;
+
+        tableBody.appendChild(row);
+    });
+}
 // Global variable for PC requests
 let pcRequests = [
     {
@@ -128,9 +474,11 @@ function renderPCRequests() {
     pcRequests.forEach(request => {
         const card = document.createElement('div');
         card.className = 'bg-white rounded-lg shadow p-4 mb-4';
+        card.setAttribute('data-pc-id', request.id); // Add data attribute for identification
+        
         card.innerHTML = `
             <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 ai-style-change-1">
+                <div class="flex-shrink-0">
                     <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                         <i class='bx bx-desktop text-indigo-600 text-xl'></i>
                     </div>
@@ -167,25 +515,41 @@ function renderPCRequests() {
                 </div>
             </div>
         `;
+        
         container.appendChild(card);
     });
 }
 
 // Function to handle approve/reject actions
 function handlePCAction(pcId, action) {
-    const pc = pcRequests.find(req => req.id === pcId);
-    if (!pc) return;
-
-    const isConfirmed = window.confirm(`Do you want to ${action.toLowerCase()} PC: ${pc.pcName}?`);
-    if (isConfirmed) {
-        pcRequests = pcRequests.filter(req => req.id !== pcId);
-        renderPCRequests();
-        updateNotificationCount(); // Update the count after action
-        console.log('Notification count after action:', pcRequests.length); // Debugging line
-        alert(`PC ${action.toLowerCase()}d successfully!`);
-
-        if (pcRequests.length === 0) {
-            closeApprovePC();
+    // Find the request in the pcRequests array
+    const requestIndex = pcRequests.findIndex(req => req.id === pcId);
+    
+    if (requestIndex !== -1) {
+        // Find the notification card element
+        const card = document.querySelector(`[data-pc-id="${pcId}"]`);
+        if (card) {
+            // Add fade-out animation
+            card.style.transition = 'opacity 0.3s ease-out';
+            card.style.opacity = '0';
+            
+            setTimeout(() => {
+                // Remove the request from the array
+                pcRequests.splice(requestIndex, 1);
+                
+                // Re-render the notifications
+                renderPCRequests();
+                
+                // Update notification count
+                updateNotificationCount();
+                
+                // Show appropriate toast message
+                if (action === 'Approve') {
+                    showToast(`PC Request ${pcId} has been approved successfully`, toastTypes.SUCCESS);
+                } else if (action === 'Reject') {
+                    showToast(`PC Request ${pcId} has been rejected`, toastTypes.ERROR);
+                }
+            }, 300);
         }
     }
 }
@@ -228,6 +592,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentYear = new Date().getFullYear(); // Get the current year
     document.getElementById('organization-reg-year').max = currentYear;
     updateNotificationCount();
+    renderOrganizationsTable();
+    const actionButtons = `
+        <div class="flex space-x-3">
+            <button onclick="handlePCAction('${org.id}', 'Approve')" 
+                    class="${colors.text} hover:${colors.text}-dark transition-colors">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+            </button>
+            <button onclick="handlePCAction('${org.id}', 'Reject')" 
+                    class="text-red-600 hover:text-red-900 transition-colors">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+        </div>
+    `;
 });
 
 
@@ -538,3 +921,17 @@ function getSessionToken() {
     }
     return null;
 }
+
+// Function to show the Add Admin modal
+function showAddAdminModal() {
+    const modal = document.getElementById('add-admin-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        showToast('Please fill in the admin details', toastTypes.WARNING);
+    }
+}
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    // Call to update the notification count on page load
+    updateNotificationCount(); // Initial count update
+});
