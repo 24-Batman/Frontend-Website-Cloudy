@@ -1,5 +1,5 @@
 const API_URLS = {
-    login: "https://mdashttpusertrigger.azurewebsites.net/api/login?code=3gl-Yy4DjSjYlQ9KxPIVGy5X9hKg425nqp86gSR5OyD5AzFu1FyQKQ%3D%3D",
+    login: "https://mdasriyashtttptrigger.azurewebsites.net/api/login?code=wpxLyLYGLvATTYS-lA5oS16OJgmno_duPCqYON3ApgqrAzFu62BsVA%3D%3D",
     getSiteList: "https://mdashttpusertrigger.azurewebsites.net/api/GetSiteList?",
     createSite: "https://mdashttpusertrigger.azurewebsites.net/api/CreateSite?",
     assignSiteAdmin: "https://mdashttpusertrigger.azurewebsites.net/api/AssignSiteAdmin?",
