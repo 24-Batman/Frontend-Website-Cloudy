@@ -88,75 +88,58 @@ rememberCheckbox.addEventListener('change', function() {
 });
 
 // Login form handler
-document.getElementById('loginForm').addEventListener('submit', function (e) {
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    
-    if (!validateEmail(email)) {
-        alert('Please enter a valid email address');
-        return;
-    }
-    
-    if (!validatePassword(password)) {
-        alert('Password must be at least 8 characters long');
-        return;
-    }
-    
     showLoading();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const rememberMe = document.getElementById('remember').checked;
 
-    if (document.getElementById('remember').checked) {
-        localStorage.setItem('rememberedEmail', email);
-    }
+    try {
+        const response = await fetch(API_URLS.login, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userEmail: email,
+                password: password
+            })
+        });
 
-    const loginData = {
-        userEmail: email,
-        password: password
-    };
-
-    fetch(API_URLS.login, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        hideLoading();
+        const data = await response.json();
+        // console.log('Login Response:', data); // Debug log
 
         if (data.status === 'Verified') {
-            const role = data.role;
-            const token = data.token;
-            
-            if (token) {
-                const expiryDate = new Date();
-                expiryDate.setHours(expiryDate.getHours() + 24);
-                document.cookie = `sessionToken=${token}; expires=${expiryDate.toUTCString()}; Secure; SameSite=Strict; Path=/;`;
+            // Store user details immediately after successful login
+            localStorage.setItem('userDetails', JSON.stringify({
+                name: data.userDetails.userName,
+                email: data.userDetails.userEmail,
+                role: data.role,
+                initials: data.userDetails.userName.split(' ').map(n => n[0]).join('').toUpperCase()
+            }));
+
+            // Store credentials if remember me is checked
+            if (rememberMe) {
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userPassword', password);
             }
 
-            const redirectUrl = ROLE_REDIRECTS[role];
+            // Set token in cookie
+            document.cookie = `sessionToken=${data.token}; path=/`;
+
+            // Redirect based on role
+            const redirectUrl = ROLE_REDIRECTS[data.role];
             if (redirectUrl) {
                 window.location.href = redirectUrl;
-            } else {
-                alert(`Unknown role: ${role}`);
             }
         } else {
-            alert('Invalid credentials, please try again!');
+            alert('Invalid credentials');
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        hideLoading();
-        alert('An error occurred during login. Please try again later.');
-    });
+    } catch (error) {
+        console.error('Login Error:', error);
+        alert('An error occurred during login');
+    }
 });
 
 // Password toggle functionality

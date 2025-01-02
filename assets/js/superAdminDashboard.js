@@ -15,56 +15,36 @@ function getSessionToken() {
     return null;
 }
 
-// Generate dummy data for owners with simpler structure
-function generateDummyOwners(count = 10) {
-    const owners = [
-        { name: 'Arun', email: 'arun@mail.com', organization: 'Tech Corp' },
-        { name: 'Karthik', email: 'karthik@mail.com', organization: 'Mars Industries' },
-        { name: 'Priya', email: 'priya@mail.com', organization: 'Cloud Systems' },
-        { name: 'Rahul', email: 'rahul@mail.com', organization: 'Data Corp' },
-        { name: 'Sneha', email: 'sneha@mail.com', organization: 'AI Solutions' }
-    ];
+// Add these toast functions at the top of your file
+const toastTypes = {
+    SUCCESS: 'success',
+    ERROR: 'error',
+    WARNING: 'warning',
+    INFO: 'info'
+};
 
-    return Array.from({ length: count }, (_, index) => ({
-        id: index + 1,
-        ...owners[index % owners.length]
-    }));
+function showToast(message, type = toastTypes.INFO) {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 p-4 rounded-lg text-white ${
+        type === toastTypes.SUCCESS ? 'bg-green-500' :
+        type === toastTypes.ERROR ? 'bg-red-500' :
+        type === toastTypes.WARNING ? 'bg-yellow-500' : 'bg-blue-500'
+    } transition-opacity duration-300`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
-// Modified fetchOwnersData to match the exact table structure
-async function fetchOwnersData() {
-    try {
-        const data = generateDummyOwners(10);
-        const tableBody = document.querySelector('#owners-table tbody');
-        tableBody.innerHTML = '';
-
-        data.forEach((owner, index) => {
-            const row = document.createElement('tr');
-            row.classList.add('hover:bg-gray-50', 'transition-colors');
-            
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.id}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.name}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.email}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.organization}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">********</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <div class="flex space-x-3">
-                        <button onclick="handleOwnerAction('${owner.id}', 'edit')" 
-                                class="text-indigo-600 hover:text-indigo-900 transition-colors">
-                            <i class='bx bx-edit-alt text-xl'></i>
-                        </button>
-                        <button onclick="handleOwnerAction('${owner.id}', 'delete')" 
-                                class="text-red-600 hover:text-red-900 transition-colors">
-                            <i class='bx bx-trash text-xl'></i>
-                        </button>
-                    </div>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-    } catch (error) {
-        showToast('Error loading owners data: ' + error.message, toastTypes.ERROR);
+// Add modal close function
+function closeAddOwnerModal() {
+    const modal = document.getElementById('add-owner-modal');
+    if (modal) {
+        modal.classList.add('hidden');
     }
 }
 
@@ -161,11 +141,87 @@ function showSuccess(element) {
     element.parentNode.appendChild(checkmark);
 }
 
+// Function to fetch and update user details
+async function refreshUserDetails() {
+    try {
+        const response = await fetch(API_URLS.login + '&verify=true', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userEmail: localStorage.getItem('userEmail'),
+                password: localStorage.getItem('userPassword')
+            })
+        });
+        
+        const data = await response.json();
+        if (data.status === 'Verified') {
+            const userDetails = data.userDetails;
+            localStorage.setItem('userDetails', JSON.stringify({
+                name: userDetails.userName,
+                email: userDetails.userEmail,
+                role: data.role,
+                initials: userDetails.userName.split(' ').map(n => n[0]).join('').toUpperCase()
+            }));
+            
+            updateProfileSection();
+        }
+    } catch (error) {
+        console.error('Error refreshing user details:', error);
+    }
+}
+
+// Refresh user details every 5 minutes (optional)
+setInterval(refreshUserDetails, 5 * 60 * 1000);
+
+// Update the profile section function
+function updateProfileSection() {
+    
+    const storedDetails = localStorage.getItem('userDetails');
+    if (!storedDetails) {
+        // console.log('No stored details found');
+        return;
+    }
+
+    try {
+        const userDetails = JSON.parse(storedDetails);
+        // Update profile avatar initials
+        const profileInitials = document.querySelector('.profile-avatar span');
+        if (profileInitials) {
+            profileInitials.textContent = userDetails.initials || 'SA';
+        } else {
+            profileInitials.textContent = 'N/A';
+        }
+
+        // Update name and email
+        const profileName = document.querySelector('.profile-info-name');
+        if (profileName) {
+            profileName.textContent = userDetails.name || 'Super Admin';
+        } else {
+            profileName.textContent = 'N/A';
+        }
+
+        const profileEmail = document.querySelector('.profile-info-email');
+        if (profileEmail) {
+            profileEmail.textContent = userDetails.email || 'admin@example.com';
+        } else {
+            profileEmail.textContent = 'N/A';
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+    }
+}
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    updateProfileSection();
+
     const modal = document.getElementById('add-owner-modal');
     const closeBtn = document.getElementById('close-owner-modal-btn');
     const form = document.getElementById('add-owner-form');
+    console.log('Form found:', form); // Debug: Check if form is found
     
     function closeAddOwnerModal() {
         if (modal) {
@@ -199,6 +255,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form submission
     form?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log('Form submitted'); // Debug: Form submission triggered
+        
         const submitButton = e.target.querySelector('button[type="submit"]');
         
         try {
@@ -213,6 +271,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 userGender: document.getElementById('owner-gender').value,
                 userAddress: document.getElementById('owner-address').value
             };
+            
+            console.log('Owner Data:', ownerData); // Debug: Check form data
+            console.log('API URL:', API_URLS.createUser); // Debug: Check API URL
 
             const response = await fetch(API_URLS.createUser, {
                 method: 'POST',
@@ -223,15 +284,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(ownerData)
             });
 
+            console.log('API Response:', response); // Debug: Check API response
+            
             const result = await response.json();
+            console.log('API Result:', result); // Debug: Check parsed response
+
             if (response.ok && result.status === 'success') {
-                closeAddOwnerModal();
-                fetchOwnersData();
+                console.log('Owner created successfully'); // Debug: Success path
+                // Close the modal
+                document.getElementById('add-owner-modal').classList.add('hidden');
+                // Clear the form
+                form.reset();
+                // Show success message
                 showToast(result.message, toastTypes.SUCCESS);
+                // Refresh the owners table
+                fetchOwnersData();
             } else {
                 throw new Error(result.message || 'Failed to add owner');
             }
         } catch (error) {
+            console.error('Error creating owner:', error); // Debug: Log any errors
             showToast('Error: ' + error.message, toastTypes.ERROR);
         } finally {
             hideLoading(submitButton);
@@ -273,18 +345,84 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize visual feedback
     addVisualFeedback();
 });
-
-// Success message
-showToast('Owner added successfully!', toastTypes.SUCCESS);
-
-// Error message
-showToast('Failed to add owner', toastTypes.ERROR);
-
-// Warning message
-showToast('Please fill all required fields', toastTypes.WARNING);
-
 // Info message
 showToast('Loading owner data...', toastTypes.INFO);
 
+// Add this logout function
+function handleLogout() {
+    // Clear localStorage
+    localStorage.removeItem('userDetails');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userPassword');
+    
+    // Clear session cookie
+    document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
+    // Redirect to login page
+    window.location.href = '/login.html';
+}
 
+// Update fetchOwnersData to use POST method
+async function fetchOwnersData() {
+    try {
+        console.log('Fetching owners data...'); // Debug: Start of fetch
+        console.log('API URL:', API_URLS.getOrgOwnerList); // Debug: Check API URL
+        
+        const response = await fetch(API_URLS.getOrgOwnerList, {
+            method: 'POST', // Changed from GET to POST
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "dummy": null
+            })
+        });
 
+        console.log('Owners API Response:', response); // Debug: Check API response
+        
+        const data = await response.json();
+        console.log('Owners Data:', data); // Debug: Check parsed data
+
+        const tableBody = document.querySelector('#owners-table tbody');
+        if (!tableBody) {
+            console.error('Table body not found');
+            return;
+        }
+        
+        tableBody.innerHTML = '';
+
+        if (data && Array.isArray(data)) {
+            data.forEach((owner) => {
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50', 'transition-colors');
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.user_id || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.user_name || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.user_email || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">********</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <div class="flex space-x-3">
+                            <button data-id="${owner.user_id}" 
+                                    class="edit-btn text-indigo-600 hover:text-indigo-900 transition-colors">
+                                <i class='bx bx-edit-alt text-xl'></i>
+                            </button>
+                            <button data-id="${owner.user_id}" 
+                                    class="delete-btn text-red-600 hover:text-red-900 transition-colors">
+                                <i class='bx bx-trash text-xl'></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    } catch (error) {
+        console.error('Error in fetchOwnersData:', error);
+        showToast('Error loading owners data: ' + error.message, toastTypes.ERROR);
+    }
+}
+
+// Check if token is available
+console.log('Token available:', !!token); // Debug: Check token
