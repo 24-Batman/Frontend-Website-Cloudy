@@ -3,7 +3,7 @@ const API_URLS = {
     getSiteList: "https://mdashttpusertrigger.azurewebsites.net/api/GetSiteList?",
     createSite: "https://mdashttpusertrigger.azurewebsites.net/api/CreateSite?",
     assignSiteAdmin: "https://mdashttpusertrigger.azurewebsites.net/api/AssignSiteAdmin?",
-    getOrgList: "https://mdashttpusertrigger.azurewebsites.net/api/getOrganizationList?",
+    getOrgList: "https://mdasriyashtttptrigger.azurewebsites.net/api/getOrganizationList?",
     createOrg: "https://mdashttpusertrigger.azurewebsites.net/api/CreateOrganization?",
     assignOrgAdmin: "https://mdashttpusertrigger.azurewebsites.net/api/assignOrgAdmin?",
     getNotApprovedPcList: "https://mdashttpusertrigger.azurewebsites.net/api/GetNotApprovedPcList?",

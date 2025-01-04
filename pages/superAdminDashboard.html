@@ -300,13 +300,10 @@
                         <div>
                             <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Total Organizations</h3>
                             <div class="flex items-center mt-2">
-                                <div class="text-3xl font-bold text-gray-900" id="active-sites">37</div>
+                                <div class="text-3xl font-bold text-gray-900" id="active-sites">0</div>
                                 <div class="flex items-center ml-2 text-orange-500 text-sm">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" />
-                                    </svg>
-                                    <span class="ml-1">70%</span>
+                                    <span id="org-arrow"></span>
+                                    <span id="org-percent" class="text-sm">0%</span>
                                 </div>
                             </div>
                         </div>
@@ -328,15 +325,12 @@
                 <div class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Active Admins</h3>
+                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Active Owners</h3>
                             <div class="flex items-center mt-2">
-                                <div class="text-3xl font-bold text-gray-900">8</div>
+                                <div class="text-3xl font-bold text-gray-900" id="active-owners">0</div>
                                 <div class="flex items-center ml-2 text-green-500 text-sm">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" />
-                                    </svg>
-                                    <span class="ml-1">+2 new</span>
+                                    <span id="owner-arrow"></span>
+                                    <span id="owner-percent" class="text-sm">0%</span>
                                 </div>
                             </div>
                         </div>
@@ -409,11 +403,11 @@
                 <table class="min-w-full divide-y divide-gray-200" id="owners-table">
                     <thead class="bg-gray-50 sticky top-0 z-10">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">S.NO</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">OWNER NAME</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">OWNER EMAIL</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">OWNER PASSWORD</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-white">ACTIONS</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -469,9 +463,12 @@
                             <div>
                                 <label for="owner-password" class="block text-sm font-medium text-gray-700">Owner
                                     Password</label>
-                                <input type="password" id="owner-password"
-                                    class="mt-1 block w-full px-4 py-2 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                                    required />
+                                <div class="mt-1">
+                                    <input type="password" 
+                                           id="owner-password"
+                                           class="block w-full px-4 py-2 pr-10 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                           required />
+                                </div>
                             </div>
                             <div>
                                 <label for="owner-mobile1" class="block text-sm font-medium text-gray-700">Mobile Number
@@ -536,70 +533,6 @@
 
     <script type="text/javascript" src="../assets/js/api.js"></script>
     <script src="../assets/js/superAdminDashboard.js"></script>
-    <script>
-        function closeAddOwnerModal() {
-                const modal = document.getElementById('add-owner-modal-btn');
-                if (modal) {
-                    modal.classList.add('hidden');
-                }
-            }
-
-            // Event listener for the close button
-            document.getElementById('close-owner-modal-btn').addEventListener('click', closeAddAdminModal);
-
-            // Event listener for the form submission
-            document.getElementById('add-owner-form').addEventListener('submit', function (e) {
-                e.preventDefault();
-                // Add your form submission logic here
-                closeAddOwnerModal();
-                showToast('Owner added successfully!', toastTypes.SUCCESS);
-            });
-        
-        // JavaScript to handle modal display and form submission
-        document.getElementById('add-owner-btn').addEventListener('click', function() {
-            document.getElementById('add-owner-modal').classList.remove('hidden');
-        });
-
-        document.getElementById('close-owner-modal-btn').addEventListener('click', function() {
-            document.getElementById('add-owner-modal').classList.add('hidden');
-        });
-
-        document.getElementById('add-owner-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            
-            const ownerName = document.getElementById('owner-name').value;
-            const ownerEmail = document.getElementById('owner-email').value;
-            const ownerPassword = document.getElementById('owner-password').value;
-            const ownerMobile1 = document.getElementById('owner-mobile1').value;
-            const ownerAddress = document.getElementById('owner-address').value;
-            const ownerOrganization = document.getElementById('owner-organization').value;
-            const ownerGender = document.getElementById('owner-gender').value;
-
-            // Show the organization details card with the form data
-            showOrgDetails(ownerName, ownerEmail, ownerPassword, ownerMobile1, ownerAddress, ownerOrganization, ownerGender);
-
-            // Hide the modal
-            document.getElementById('add-owner-modal').classList.add('hidden');
-        });
-
-        function showOrgDetails(name, email, password, mobile, address, organization, gender) {
-            const detailsContent = document.getElementById('org-details-content');
-            detailsContent.innerHTML = `
-                <p><strong>Owner Name:</strong> ${name}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Password:</strong> ${password}</p>
-                <p><strong>Mobile Number:</strong> ${mobile}</p>
-                <p><strong>Address:</strong> ${address}</p>
-                <p><strong>Organization:</strong> ${organization}</p>
-                <p><strong>Gender:</strong> ${gender}</p>
-            `;
-            document.getElementById('org-details-card').classList.remove('hidden');
-        }
-
-        function closeOrgDetails() {
-            document.getElementById('org-details-card').classList.add('hidden');
-        }
-    </script>
 </body>
 
 </html>
