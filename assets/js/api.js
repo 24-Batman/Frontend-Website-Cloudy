@@ -15,5 +15,7 @@ const API_URLS = {
     assignPcAdmin: "https://mdashttpusertrigger.azurewebsites.net/api/assignPcAdmin?",
     getOrgOwnerList: "https://mdasriyashtttptrigger.azurewebsites.net/api/getOrgOwnerList?code=8hX7ReLYGZzIfL5ESvsAakBPaJOxdpMY_LKLESBUO7PyAzFu6ywZOA%3D%3D",
     createUser: "https://mdasriyashtttptrigger.azurewebsites.net/api/createuser?",
-    getUserDetailsById: "https://mdashttpusertrigger.azurewebsites.net/api/getUserDetails?code=Gj4EwGmOaf9ypzXP3cKjSR0ci1EOEpRfSXr_gUTFzo7dAzFupHHHXQ%3D%3D"
+    deleteOrgOwner: "https://mdasriyashtttptrigger.azurewebsites.net/api/deleteUser?code=acDiBfLrQ6DEEVzpuMOOCzYvy6XjMzH7bb9JITbt4NucAzFuvDkx9g%3D%3D",
+    editOrgOwner: "https://mdasriyashtttptrigger.azurewebsites.net/api/editUserDetails?code=UrPd-nWMiocDlTJod-oZpD7kc37bEHmW5gWKD3aCkpeYAzFuiMjuLA%3D%3D",
+    getUserDetailsById: " https://mdasriyashtttptrigger.azurewebsites.net/api/getUserDetails?"
 };

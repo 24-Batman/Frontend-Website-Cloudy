@@ -560,29 +560,64 @@ async function fetchOwnersData() {
         
         const data = await response.json();
         const tableBody = document.querySelector('#owners-table tbody');
-        if (!tableBody) return;
+        if (!tableBody) {
+            console.error('Table body not found');
+            return;
+        }
         
         tableBody.innerHTML = '';
 
         if (data && Array.isArray(data)) {
             data.forEach((owner) => {
                 const row = document.createElement('tr');
-                row.classList.add('hover:bg-gray-50', 'transition-colors');
                 
+                // Add status classes
+                const statusClasses = owner.isActive === 'i' ? 'bg-red-50' : '';
+                row.className = `hover:bg-gray-50 transition-colors ${statusClasses}`;
+                
+                // Create status badge if inactive
+                const statusBadge = owner.isActive === 'i' ? 
+                    `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Deactivated</span>` : 
+                    '';
+
+                // Create text classes based on status
+                const textClass = owner.isActive === 'i' ? 'text-gray-500' : 'text-gray-900';
+                const nameClass = owner.isActive === 'i' ? 'text-gray-500 line-through' : 'text-gray-900';
+
+                // Create button states
+                const buttonState = owner.isActive === 'i' ? 'disabled' : '';
+                const deleteButtonClass = owner.isActive === 'i' ? 
+                    'text-gray-400 cursor-not-allowed' : 
+                    'text-red-600 hover:text-red-900';
+                const editIconClass = owner.isActive === 'i' ? 'opacity-50' : '';
+
                 row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.user_id || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.user_name || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.user_email || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${owner.user_mobile_1 || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${owner.user_id || '-'}
+                        ${statusBadge}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm ${nameClass}">
+                        ${owner.user_name || '-'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm ${textClass}">
+                        ${owner.user_email || '-'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm ${textClass}">
+                        ${owner.user_mobile_1 || '-'}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <div class="flex space-x-3">
-                            <button data-id="${owner.user_id}" 
-                                    class="edit-btn text-indigo-600 hover:text-indigo-900 transition-colors">
-                                <i class='bx bx-edit-alt text-xl'></i>
+                            <button type="button" 
+                                onclick="openOwnerEditModal('${owner.user_id}')"
+                                class="edit-btn text-indigo-600 hover:text-indigo-900 transition-colors"
+                                ${buttonState}>
+                                <i class="bx bx-edit-alt text-xl ${editIconClass}"></i>
                             </button>
-                            <button data-id="${owner.user_id}" 
-                                    class="delete-btn text-red-600 hover:text-red-900 transition-colors">
-                                <i class='bx bx-trash text-xl'></i>
+                            <button type="button"
+                                onclick="deleteOwner('${owner.user_id}', '${owner.user_name}')"
+                                class="delete-btn ${deleteButtonClass} transition-colors"
+                                ${buttonState}>
+                                <i class="bx bx-trash text-xl"></i>
                             </button>
                         </div>
                     </td>
@@ -590,58 +625,169 @@ async function fetchOwnersData() {
                 tableBody.appendChild(row);
             });
         }
-
-        // Update dashboard stats after fetching owners
-        updateDashboardStats();
-        
     } catch (error) {
+        console.error('Error in fetchOwnersData:', error);
         showToast('Error loading owners data: ' + error.message, toastTypes.ERROR);
     }
 }
 
-// Check if token is available
-console.log('Token available:', !!token); // Debug: Check token
-
-// Add this function to handle password visibility toggle
-function setupPasswordToggle() {
-    const passwordInput = document.getElementById('owner-password');
-    const currentType = passwordInput.getAttribute('type');
-    
-    // Create and insert the eye icon button
-    const toggleButton = document.createElement('button');
-    toggleButton.type = 'button';
-    toggleButton.className = 'absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none';
-    toggleButton.innerHTML = `
-        <i class='bx bx-hide text-xl password-toggle-icon'></i>
-    `;
-
-    // Wrap password input in a relative div for proper positioning
-    const wrapper = document.createElement('div');
-    wrapper.className = 'relative';
-    passwordInput.parentNode.insertBefore(wrapper, passwordInput);
-    wrapper.appendChild(passwordInput);
-    wrapper.appendChild(toggleButton);
-
-    // Add click event to toggle password visibility
-    toggleButton.addEventListener('click', function() {
-        const icon = this.querySelector('.password-toggle-icon');
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.remove('bx-hide');
-            icon.classList.add('bx-show');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.remove('bx-show');
-            icon.classList.add('bx-hide');
-        }
+// Add this new function to handle edit button clicks
+function addEditButtonHandlers() {
+    const editButtons = document.querySelectorAll('.edit-btn');
+    editButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const userId = this.getAttribute('data-user-id');
+            console.log('Edit button clicked with userId:', userId);
+            if (userId) {
+                openOwnerEditModal(userId);
+            } else {
+                console.error('No user ID found for edit button');
+            }
+        });
     });
 }
 
-// Call this function when the modal is opened
-document.getElementById('btn-add-owner')?.addEventListener('click', function() {
-    const modal = document.getElementById('add-owner-modal');
+// Updated function names and IDs for edit modal
+async function openOwnerEditModal(userId) {
+    console.log('Opening edit modal for user:', userId);
+    try {
+        const modal = document.getElementById('owner-edit-modal');
+        if (!modal) {
+            console.error('Edit modal not found');
+            return;
+        }
+
+        // Force modal visibility
+        modal.style.cssText = `
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 9999 !important;
+        `;
+        modal.classList.remove('hidden', 'invisible', 'opacity-0');
+        
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+
+        const response = await fetch(API_URLS.getUserDetailsById, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                "userID": userId
+            })
+        });
+
+        const result = await response.json();
+        console.log('User data received:', result);
+
+        if (result.status === "Success" && result.data) {
+            const userData = result.data;
+            
+            // Updated IDs for form fields
+            const formFields = {
+                'owner-edit-id': userData.userId,
+                'owner-edit-name': userData.userName,
+                'owner-edit-email': userData.userEmail,
+                'owner-edit-mobile1': userData.userMobile1,
+                'owner-edit-mobile2': userData.userMobile2,
+                'owner-edit-address': userData.userAddress,
+                'owner-edit-gender': userData.userGender
+            };
+
+            Object.entries(formFields).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.value = value || '';
+                }
+            });
+        } else {
+            throw new Error(result.message || 'Failed to load user details');
+        }
+    } catch (error) {
+        console.error('Error in openOwnerEditModal:', error);
+        showToast('Error loading user details: ' + error.message, toastTypes.ERROR);
+        closeOwnerEditModal();
+    }
+}
+
+function closeOwnerEditModal() {
+    const modal = document.getElementById('owner-edit-modal');
     if (modal) {
-        modal.classList.remove('hidden');
-        setupPasswordToggle(); // Setup password toggle when modal opens
+        modal.style.cssText = '';
+        modal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Update the table row generation in fetchOwnersData
+function createOwnerRow(owner) {
+    return `
+        <td class="px-6 py-4 whitespace-nowrap text-sm">
+            <div class="flex space-x-3">
+                <button type="button" 
+                        onclick="openOwnerEditModal('${owner.user_id}')"
+                        class="edit-btn text-indigo-600 hover:text-indigo-900 transition-colors">
+                    <i class='bx bx-edit-alt text-xl'></i>
+                </button>
+                <!-- ... other buttons ... -->
+            </div>
+        </td>
+    `;
+}
+
+// Update form submit handler
+document.getElementById('owner-edit-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    try {
+        const formData = {
+            "userId": document.getElementById('owner-edit-id').value,
+            "userEmail": document.getElementById('owner-edit-email').value,
+            "userName": document.getElementById('owner-edit-name').value,
+            "userMobile1": document.getElementById('owner-edit-mobile1').value,
+            "userMobile2": document.getElementById('owner-edit-mobile2').value || "",
+            "userGender": document.getElementById('owner-edit-gender').value,
+            "userAddress": document.getElementById('owner-edit-address').value
+        };
+
+        // Handle password separately
+        const password = document.getElementById('owner-edit-password').value;
+        if (password && password.trim() !== '') {
+            formData.password = password;
+        }
+
+        console.log('Sending update request with data:', formData); // Debug log
+
+        const response = await fetch(API_URLS.editOrgOwner, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+        console.log('Update response:', result); // Debug log
+
+        if (result.status === "Success") {
+            showToast('Owner updated successfully', toastTypes.SUCCESS);
+            closeOwnerEditModal();
+            fetchOwnersData();
+        } else {
+            throw new Error(result.message || 'Failed to update owner');
+        }
+    } catch (error) {
+        console.error('Error updating owner:', error);
+        showToast('Error: ' + error.message, toastTypes.ERROR);
     }
 });
+
+// Make functions available globally
+window.openOwnerEditModal = openOwnerEditModal;
+window.closeOwnerEditModal = closeOwnerEditModal;
+window.deleteOwner = deleteOwner;

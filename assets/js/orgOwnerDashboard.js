@@ -587,12 +587,50 @@ const token = getSessionToken();
 
 var adminAddOrgId = null;
 
+function updateProfileSection() {
+
+    const storedDetails = localStorage.getItem('userDetails');
+    if (!storedDetails) {
+        // console.log('No stored details found');
+        return;
+    }
+
+    try {
+        const userDetails = JSON.parse(storedDetails);
+        // Update profile avatar initials
+        const profileInitials = document.querySelector('.profile-avatar span');
+        if (profileInitials) {
+            profileInitials.textContent = userDetails.initials || 'SA';
+        } else {
+            profileInitials.textContent = 'N/A';
+        }
+
+        // Update name and email
+        const profileName = document.querySelector('.profile-info-name');
+        if (profileName) {
+            profileName.textContent = userDetails.name || 'Super Admin';
+        } else {
+            profileName.textContent = 'N/A';
+        }
+
+        const profileEmail = document.querySelector('.profile-info-email');
+        if (profileEmail) {
+            profileEmail.textContent = userDetails.email || 'admin@example.com';
+        } else {
+            profileEmail.textContent = 'N/A';
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+    }
+}
+
 // Set the max value of the registration year input dynamically
 document.addEventListener('DOMContentLoaded', () => {
     const currentYear = new Date().getFullYear(); // Get the current year
     document.getElementById('organization-reg-year').max = currentYear;
     updateNotificationCount();
     renderOrganizationsTable();
+    updateProfileSection();
     const actionButtons = `
         <div class="flex space-x-3">
             <button onclick="handlePCAction('${org.id}', 'Approve')" 
@@ -930,8 +968,3 @@ function showAddAdminModal() {
         showToast('Please fill in the admin details', toastTypes.WARNING);
     }
 }
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', () => {
-    // Call to update the notification count on page load
-    updateNotificationCount(); // Initial count update
-});
