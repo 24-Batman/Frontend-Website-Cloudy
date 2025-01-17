@@ -4,7 +4,7 @@ const API_URLS = {
     createSite: "https://mdashttpusertrigger.azurewebsites.net/api/CreateSite?",
     assignSiteAdmin: "https://mdashttpusertrigger.azurewebsites.net/api/AssignSiteAdmin?",
     getOrgList: "https://mdasriyashtttptrigger.azurewebsites.net/api/getOrganizationList?",
-    createOrg: "https://mdashttpusertrigger.azurewebsites.net/api/CreateOrganization?",
+    createOrg: "https://mdasriyashttpusertrigger.azurewebsites.net/api/CreateOrganization?",
     assignOrgAdmin: "https://mdashttpusertrigger.azurewebsites.net/api/assignOrgAdmin?",
     getNotApprovedPcList: "https://mdashttpusertrigger.azurewebsites.net/api/GetNotApprovedPcList?",
     approvePc: "https://mdashttpusertrigger.azurewebsites.net/api/ApprovePc?code=R0kDA_YwTNWOuP2PJJc1KmM0LJBWWtVe0pe_8TQ0pz5FAzFumx8_OA%3D%3D",

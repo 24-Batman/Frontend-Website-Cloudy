@@ -9,14 +9,20 @@ const ROLE_REDIRECTS = {
 
 // Helper functions
 function showLoading() {
-    document.getElementById('overlay').classList.remove('hidden');
-    document.getElementById('root').classList.add('content-blur');
+    const overlay = document.getElementById('overlay');
+    const root = document.getElementById('root');
+    
+    if (overlay) overlay.classList.remove('hidden');
+    if (root) root.classList.add('content-blur');
     document.body.classList.add('disabled');
 }
 
 function hideLoading() {
-    document.getElementById('overlay').classList.add('hidden');
-    document.getElementById('root').classList.remove('content-blur');
+    const overlay = document.getElementById('overlay');
+    const root = document.getElementById('root');
+    
+    if (overlay) overlay.classList.add('hidden');
+    if (root) root.classList.remove('content-blur');
     document.body.classList.remove('disabled');
 }
 
@@ -90,10 +96,19 @@ rememberCheckbox.addEventListener('change', function() {
 // Login form handler
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    showLoading();
+    
+    // Get all required elements
+    const errorDiv = document.getElementById('login-error');
+    const errorMessage = errorDiv?.querySelector('p');
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const rememberMe = document.getElementById('remember').checked;
+
+    // Show loading
+    showLoading();
+    
+    // Clear any existing error messages
+    if (errorDiv) errorDiv.classList.add('hidden');
 
     try {
         const response = await fetch(API_URLS.login, {
@@ -107,8 +122,18 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             })
         });
 
-        const data = await response.json();
-        // console.log('Login Response:', data); // Debug log
+        // Check if response is ok before trying to parse JSON
+        if (!response.ok) {
+            throw new Error(`Account not found! status: ${response.status}`);
+        }
+
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            console.error('JSON Parse Error:', jsonError);
+            throw new Error('Server response was not in the correct format. Please try again.');
+        }
 
         if (data.status === 'Verified') {
             // Store user details immediately after successful login
@@ -121,8 +146,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
             // Store credentials if remember me is checked
             if (rememberMe) {
-                localStorage.setItem('userEmail', email);
-                localStorage.setItem('userPassword', password);
+                localStorage.setItem('rememberedEmail', email);
             }
 
             // Set token in cookie
@@ -134,11 +158,21 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                 window.location.href = redirectUrl;
             }
         } else {
-            alert('Invalid credentials');
+            // Show error message in the page
+            if (errorDiv && errorMessage) {
+                errorDiv.classList.remove('hidden');
+                errorMessage.textContent = 'Invalid credentials. Please try again.';
+            }
+            hideLoading();
         }
     } catch (error) {
         console.error('Login Error:', error);
-        alert('An error occurred during login');
+        // Show error message in the page
+        if (errorDiv && errorMessage) {
+            errorDiv.classList.remove('hidden');
+            errorMessage.textContent = error.message || 'An error occurred during login. Please try again later.';
+        }
+        hideLoading();
     }
 });
 

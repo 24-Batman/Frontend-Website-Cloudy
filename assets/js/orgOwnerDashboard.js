@@ -420,11 +420,47 @@ document.getElementById('close-org-modal-btn').addEventListener('click', functio
     document.getElementById('add-organization-modal').classList.add('hidden');
 });
 
-document.getElementById('add-organization-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-    // Add your form submission logic here
-    alert('Organization added successfully!');
-    document.getElementById('add-organization-modal').classList.add('hidden');
+document.getElementById('add-organization-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Gather form data in the exact format required by the API
+    const organizationData = {
+        "orgName": document.getElementById('organization-name').value,
+        "orgAddress": document.getElementById('organization-address').value,
+        "regYear": document.getElementById('organization-reg-year').value,
+        "gstNumber": document.getElementById('organization-gst').value
+    };
+
+    try {
+        // Make the API request
+        const response = await fetch(API_URLS.createOrg, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(organizationData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.status === 'success') {
+            // Hide the modal after successful creation
+            document.getElementById('add-organization-modal').classList.add('hidden');
+            
+            // Refresh the organizations list
+            await fetchOrganizationsData();
+            
+            // Show success message
+            showToast(result.message || 'Organization created successfully', toastTypes.SUCCESS);
+        } else {
+            // Show error message
+            showToast(result.message || 'Failed to add organization', toastTypes.ERROR);
+        }
+    } catch (error) {
+        console.error('Error creating organization:', error);
+        showToast('Error: Failed to create organization', toastTypes.ERROR);
+    }
 });
 
 // JavaScript to handle sidebar toggle
