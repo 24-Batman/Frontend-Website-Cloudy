@@ -1,125 +1,3 @@
-// Sample data for organizations with color variations
-const sampleOrganizations = [
-    {
-        id: "ORG001",
-        name: "Tech Solutions Inc",
-        address: "123 Business Park",
-        city: "Chennai, TN 600001",
-        admin: {
-            name: "Rahul Singh",
-            email: "rahul.s@techsolutions.com",
-            initials: "RS"
-        },
-        status: "Active",
-        iconColor: "blue" // Color theme for this org
-    },
-    {
-        id: "ORG002",
-        name: "Digital Dynamics",
-        address: "456 Tech Avenue",
-        city: "Bangalore, KA 560001",
-        admin: null,
-        status: "Pending",
-        iconColor: "purple" // Different color theme
-    },
-    {
-        id: "ORG003",
-        name: "Global Systems Ltd",
-        address: "789 Innovation Road",
-        city: "Mumbai, MH 400001",
-        admin: {
-            name: "Priya Patel",
-            email: "priya.p@globalsystems.com",
-            initials: "PP"
-        },
-        status: "Active",
-        iconColor: "green" // Different color theme
-    },
-    {
-        id: "ORG004",
-        name: "Future Technologies",
-        address: "321 Smart Street",
-        city: "Hyderabad, TS 500001",
-        admin: {
-            name: "Arun Kumar",
-            email: "arun.k@futuretech.com",
-            initials: "AK"
-        },
-        status: "Active",
-        iconColor: "indigo" // Different color theme
-    },
-    {
-        id: "ORG005",
-        name: "Innovate Solutions",
-        address: "567 Innovation Hub",
-        city: "Pune, MH 411001",
-        admin: {
-            name: "Sneha Reddy",
-            email: "sneha.r@innovatesolutions.com",
-            initials: "SR"
-        },
-        status: "Active",
-        iconColor: "blue"
-    },
-    {
-        id: "ORG006",
-        name: "CloudTech Systems",
-        address: "890 Cloud Avenue",
-        city: "Delhi, DL 110001",
-        admin: null,
-        status: "Pending",
-        iconColor: "purple"
-    },
-    {
-        id: "ORG007",
-        name: "DataCore Analytics",
-        address: "234 Data Street",
-        city: "Kolkata, WB 700001",
-        admin: {
-            name: "Vikram Mehta",
-            email: "vikram.m@datacore.com",
-            initials: "VM"
-        },
-        status: "Active",
-        iconColor: "green"
-    },
-    {
-        id: "ORG008",
-        name: "Smart Enterprise",
-        address: "678 Smart City",
-        city: "Ahmedabad, GJ 380001",
-        admin: {
-            name: "Neha Shah",
-            email: "neha.s@smartenterprise.com",
-            initials: "NS"
-        },
-        status: "Active",
-        iconColor: "indigo"
-    },
-    {
-        id: "ORG009",
-        name: "AI Research Labs",
-        address: "901 Research Park",
-        city: "Gurgaon, HR 122001",
-        admin: null,
-        status: "Pending",
-        iconColor: "blue"
-    },
-    {
-        id: "ORG010",
-        name: "Quantum Computing",
-        address: "345 Quantum Road",
-        city: "Noida, UP 201301",
-        admin: {
-            name: "Rajesh Kumar",
-            email: "rajesh.k@quantumcomp.com",
-            initials: "RK"
-        },
-        status: "Active",
-        iconColor: "purple"
-    }
-];
-
 // Toast notification system
 const toastTypes = {
     SUCCESS: 'success',
@@ -265,85 +143,6 @@ function getColorClasses(color) {
     return colorMap[color] || colorMap.blue; // Default to blue if color not found
 }
 
-// Function to render the organizations table
-function renderOrganizationsTable() {
-    const tableContainer = document.querySelector('#org-table').parentElement;
-    const tableBody = document.querySelector('#org-table tbody');
-    if (!tableBody) return;
-
-    // Set fixed height for table container to show exactly 3 rows
-    tableContainer.classList.add('max-h-[260px]', 'overflow-y-auto', 'scrollbar-hide');
-
-    tableBody.innerHTML = ''; // Clear existing content
-
-    sampleOrganizations.forEach(org => {
-        const colors = getColorClasses(org.iconColor);
-        const row = document.createElement('tr');
-        row.className = 'hover:bg-gray-50 transition-colors';
-
-        row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10 ${colors.bg} rounded-lg flex items-center justify-center">
-                        <svg class="h-6 w-6 ${colors.text}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-900">${org.name}</div>
-                        <div class="text-sm text-gray-500">ID: ${org.id}</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${org.address}</div>
-                <div class="text-sm text-gray-500">${org.city}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                ${org.admin ? `
-                    <div class="flex items-center">
-                        <div class="h-8 w-8 rounded-full ${colors.bg} flex items-center justify-center">
-                            <span class="text-sm font-medium ${colors.text}">${org.admin.initials}</span>
-                        </div>
-                        <div class="ml-3">
-                            <div class="text-sm font-medium text-gray-900">${org.admin.name}</div>
-                            <div class="text-sm text-gray-500">${org.admin.email}</div>
-                        </div>
-                    </div>
-                ` : `
-                    <button onclick="showAddAdminModal()"
-                        class="px-4 py-2 ${colors.bg} ${colors.text} rounded-lg hover:bg-opacity-75 transition-colors flex items-center space-x-2">
-                        <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <span class="hidden md:inline">Add Admin</span>
-                    </button>
-                `}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm ${org.status === 'Active' ? 'text-green-600' : 'text-yellow-600'}">${org.status}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <div class="flex space-x-3">
-                    <button class="${colors.text} hover:${colors.text}-dark transition-colors">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                    </button>
-                    <button class="text-red-600 hover:text-red-900 transition-colors">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                </div>
-            </td>
-        `;
-
-        tableBody.appendChild(row);
-    });
-}
 // Global variable for PC requests
 let pcRequests = [
     {
@@ -665,7 +464,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentYear = new Date().getFullYear(); // Get the current year
     document.getElementById('organization-reg-year').max = currentYear;
     updateNotificationCount();
-    renderOrganizationsTable();
+    fetchOrganizationsData();
+    updateDashboardStats();
     updateProfileSection();
     const actionButtons = `
         <div class="flex space-x-3">
@@ -687,47 +487,200 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 });
 
+async function updateDashboardStats() {
+    try {
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('sessionToken='))
+            ?.split('=')[1];
 
-// async function fetchOrganizationsData() {
-//     fetchNotApprovedPcList();
-//     const url = API_URLS.getOrgList;
-//     const requestBody = {
-//         dummy: null
-//     };
-//     const response = await fetch(url, {
-//         method: 'POST', // Using POST method
-//         headers: {
-//             'Authorization': `Bearer ${token}`, // Replace with your actual token
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify(requestBody)
-//     });
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
 
-//     const data = await response.json(); // Parse the JSON response
+        const response = await fetch(API_URLS.getOrgList, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ "dummy": null })
+        });
 
-//     document.getElementById('active-organizations').textContent = data.length;
+        const data = await response.json();
 
-//     // Populate the table
-//     const tableBody = document.querySelector('#organization-table tbody');
-//     tableBody.innerHTML = ''; // Clear the existing table data
+        if (data.status === "success" && Array.isArray(data.organizations)) {
+            // Count organizations with and without admins
+            const orgsWithAdmin = data.organizations.filter(org => 
+                org.organizationAdminName && org.organizationAdminName !== "No Admin Assigned"
+            ).length;
 
-//     data.forEach(org => {
-//         const row = document.createElement('tr');
-//         row.classList.add('text-sm', 'text-gray-700');
+            const orgsWithoutAdmin = data.organizations.filter(org => 
+                !org.organizationAdminName || org.organizationAdminName === "No Admin Assigned"
+            ).length;
 
-//         row.innerHTML = `
-//             <td class="px-6 py-3">${org.orgName}</td>
-//             <td class="px-6 py-3">${org.orgAddress}</td>
-//             <td class="px-6 py-3">${org.registeredYear}</td>
-//             <td class="px-6 py-3">${org.orgAdminName ? org.orgAdminName : `<button class="add-admin-btn px-4 py-2 bg-blue-600 text-white rounded-lg" data-id="${org.orgId}">Add Admin</button>`}</td>
-//             <td class="px-6 py-3 text-right">
-//                 <button class="edit-btn px-4 py-2 bg-blue-600 text-white rounded-lg" data-id="${org.orgId}">Edit</button>
-//                 <button class="delete-btn px-4 py-2 bg-red-600 text-white rounded-lg" data-id="${org.orgId}">Delete</button>
-//             </td>
-//         `;
-//         tableBody.appendChild(row);
-//     });
+            // Update total organizations card
+            const totalOrganizations = document.getElementById('total-organizations');
+            if (totalOrganizations) {
+                totalOrganizations.textContent = data.organizations.length;
+            }
+
+            // Update active admin instances card
+            const activeAdminCount = document.getElementById('active-sites');
+            if (activeAdminCount) {
+                activeAdminCount.textContent = orgsWithAdmin;
+            }
+
+            // Update assign admin card
+            const assignAdminCount = document.getElementById('admin-assign-count');
+            if (assignAdminCount) {
+                assignAdminCount.textContent = orgsWithoutAdmin;
+            }
+        } else {
+            console.error('Unexpected data format:', data);
+        }
+    } catch (error) {
+        console.error('Error updating dashboard stats:', error);
+        // Optionally show error in UI
+        showToast('Error updating dashboard statistics', toastTypes.ERROR);
+    }
+}
+// Function to fetch and display organizations
+async function fetchOrganizationsData() {
+    try {
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('sessionToken='))
+            ?.split('=')[1];
+
+        if (!token) {
+            window.location.href = '/login.html';
+            return;
+        }
+
+        const response = await fetch(API_URLS.getOrgList, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                "dummy": null
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const tableBody = document.querySelector('#organizations-table tbody');
+        
+        if (!tableBody) {
+            throw new Error('Table body element not found');
+        }
+
+        // Clear existing table content
+        tableBody.innerHTML = '';
+
+        if (data.status === "success" && Array.isArray(data.organizations)) {
+            data.organizations.forEach(org => {
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50', 'transition-colors');
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${org.organizationId || '-'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${org.organizationName || '-'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${org.organizationAddress || '-'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${org.organizationAdminName === "No Admin Assigned" ? 
+                            `<button type="button" 
+                                onclick="openAssignAdminModal('${org.organizationId}')"
+                                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors">
+                                <i class='bx bx-plus mr-1'></i>
+                                Add Admin
+                            </button>` : 
+                            `<span class="text-gray-900">${org.organizationAdminName}</span>`
+                        }
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <div class="flex space-x-3">
+                            <button type="button" 
+                                onclick="openEditOrgModal('${org.organizationId}')"
+                                class="text-indigo-600 hover:text-indigo-900 transition-colors">
+                                <i class='bx bx-edit-alt text-xl'></i>
+                            </button>
+                            <button type="button"
+                                onclick="deleteOrganization('${org.organizationId}')"
+                                class="text-red-600 hover:text-red-900 transition-colors">
+                                <i class='bx bx-trash text-xl'></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } else {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        ${data.message || 'No organizations found'}
+                    </td>
+                </tr>
+            `;
+        }
+    } catch (error) {
+        console.error('Error fetching organizations:', error);
+        const tableBody = document.querySelector('#organizations-table tbody');
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-red-500">
+                        Error loading organizations: ${error.message}
+                    </td>
+                </tr>
+            `;
+        }
+    }
+}
+
+// // Function to get token from cookie
+// function getToken() {
+//     return document.cookie
+//         .split('; ')
+//         .find(row => row.startsWith('sessionToken='))
+//         ?.split('=')[1];
 // }
+
+// Function to open assign admin modal
+function openAssignAdminModal(orgId) {
+    const modal = document.getElementById('add-admin-modal');
+    if (modal) {
+        // Store the organization ID for use when submitting the form
+        modal.dataset.orgId = orgId;
+        modal.classList.remove('hidden');
+    }
+}
+
+// Function to open edit organization modal
+function openEditOrgModal(orgId) {
+    // Implement edit organization functionality
+    console.log('Edit organization:', orgId);
+}
+
+// Function to delete organization
+function deleteOrganization(orgId) {
+    if (confirm('Are you sure you want to delete this organization?')) {
+        // Implement delete organization functionality
+        console.log('Delete organization:', orgId);
+    }
+}
 
 
 //open add organization modal to add organization

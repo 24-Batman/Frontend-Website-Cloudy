@@ -250,90 +250,82 @@ function calculatePercentageChange(oldValue, newValue) {
 // Function to update dashboard stats
 async function updateDashboardStats() {
     try {
+        // Helper function to update count, percentage, and arrow elements
+        const updateDashboardElement = (countElementId, percentElementId, arrowElementId, newCount, previousCount) => {
+            const change = calculatePercentageChange(previousCount, newCount);
+
+            const countElement = document.getElementById(countElementId);
+            const percentElement = document.getElementById(percentElementId);
+            const arrowElement = document.getElementById(arrowElementId);
+
+            // Update count
+            if (countElement) {
+                countElement.textContent = newCount;
+            }
+
+            // Update percentage
+            if (percentElement) {
+                percentElement.textContent = `${change.value}%`;
+                percentElement.className = `text-sm ${change.increase ? 'text-green-600' : 'text-red-600'}`;
+            }
+
+            // Update arrow
+            if (arrowElement) {
+                arrowElement.innerHTML = change.increase
+                    ? `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>`
+                    : `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>`;
+                arrowElement.className = change.increase ? 'text-green-600' : 'text-red-600';
+            }
+
+            return newCount; // Return updated count to refresh the previous count
+        };
+
         // Fetch organizations count
         const orgResponse = await fetch(API_URLS.getOrgList, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ "dummy": null })
+            body: JSON.stringify({ "dummy": null }),
         });
-        
+
         const orgData = await orgResponse.json();
-        if (orgData.status === 'success' && orgData.organizations) {
+        console.log('Organizations Data:', orgData);
+
+        if (orgData.status === 'success' && Array.isArray(orgData.organizations)) {
             const newOrgCount = orgData.organizations.length;
-            const orgChange = calculatePercentageChange(previousOrgCount, newOrgCount);
-            
-            // Update organizations count and percentage
-            const orgCountElement = document.getElementById('active-sites');
-            const orgPercentElement = document.getElementById('org-percent');
-            const orgArrowElement = document.getElementById('org-arrow');
-            
-            if (orgCountElement) {
-                orgCountElement.textContent = newOrgCount;
-            }
-            if (orgPercentElement) {
-                orgPercentElement.textContent = `${orgChange.value}%`;
-                orgPercentElement.className = `text-sm ${orgChange.increase ? 'text-green-600' : 'text-red-600'}`;
-            }
-            if (orgArrowElement) {
-                orgArrowElement.innerHTML = orgChange.increase ? 
-                    `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-                    </svg>` :
-                    `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>`;
-                orgArrowElement.className = `${orgChange.increase ? 'text-green-600' : 'text-red-600'}`;
-            }
-            
-            previousOrgCount = newOrgCount; // Update previous count after displaying
+            console.log('Organizations List:', orgData.organizations);
+            previousOrgCount = updateDashboardElement('active-sites', 'org-percent', 'org-arrow', newOrgCount, previousOrgCount);
+        } else {
+            console.error('Invalid organization data format:', orgData);
         }
 
-        // Update owners count from API data
+        // Fetch owners count
         const ownersResponse = await fetch(API_URLS.getOrgOwnerList, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ "dummy": null })
+            body: JSON.stringify({ "dummy": null }),
         });
 
         const ownersData = await ownersResponse.json();
+        console.log('Owners Data:', ownersData);
+
         const newOwnersCount = Array.isArray(ownersData) ? ownersData.length : 0;
-        const ownersChange = calculatePercentageChange(previousOwnerCount, newOwnersCount);
-        
-        // Update owners count and percentage
-        const ownerCountElement = document.getElementById('active-owners');
-        const ownerPercentElement = document.getElementById('owner-percent');
-        const ownerArrowElement = document.getElementById('owner-arrow');
-        
-        if (ownerCountElement) {
-            ownerCountElement.textContent = newOwnersCount;
-        }
-        if (ownerPercentElement) {
-            ownerPercentElement.textContent = `${ownersChange.value}%`;
-            ownerPercentElement.className = `text-sm ${ownersChange.increase ? 'text-green-600' : 'text-red-600'}`;
-        }
-        if (ownerArrowElement) {
-            ownerArrowElement.innerHTML = ownersChange.increase ?
-                `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-                </svg>` :
-                `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                </svg>`;
-            ownerArrowElement.className = `${ownersChange.increase ? 'text-green-600' : 'text-red-600'}`;
-        }
-        
-        previousOwnerCount = newOwnersCount; // Update previous count after displaying
+        previousOwnerCount = updateDashboardElement('active-owners', 'owner-percent', 'owner-arrow', newOwnersCount, previousOwnerCount);
 
     } catch (error) {
         console.error('Error updating dashboard stats:', error);
     }
 }
+
 
 // Call updateDashboardStats periodically to keep values updated
 setInterval(updateDashboardStats, 30000); // Update every 30 seconds
