@@ -674,25 +674,7 @@
 
         <script type="text/javascript" src="../assets/js/api.js"></script>
         <script src="../assets/js/orgOwnerDashboard.js"></script>
-        <script>// Function to close the Add Admin modal
-            function closeAddAdminModal() {
-                const modal = document.getElementById('add-admin-modal');
-                if (modal) {
-                    modal.classList.add('hidden');
-                }
-            }
-
-            // Event listener for the close button
-            document.getElementById('close-admin-modal-btn').addEventListener('click', closeAddAdminModal);
-
-            // Event listener for the form submission
-            document.getElementById('add-admin-form').addEventListener('submit', function (e) {
-                e.preventDefault();
-                // Add your form submission logic here
-                closeAddAdminModal();
-                showToast('Admin added successfully!', toastTypes.SUCCESS);
-            });</script>
-
+        
         <!-- Toast Container -->
         <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
             <!-- Toasts will be dynamically inserted here -->

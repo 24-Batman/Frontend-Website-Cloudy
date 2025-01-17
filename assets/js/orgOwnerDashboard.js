@@ -463,6 +463,7 @@ function updateProfileSection() {
 document.addEventListener('DOMContentLoaded', () => {
     const currentYear = new Date().getFullYear(); // Get the current year
     document.getElementById('organization-reg-year').max = currentYear;
+    document.getElementById('close-admin-modal-btn').addEventListener('click', closeAddAdminModal);
     updateNotificationCount();
     fetchOrganizationsData();
     updateDashboardStats();
@@ -647,38 +648,6 @@ async function fetchOrganizationsData() {
                 </tr>
             `;
         }
-    }
-}
-
-// // Function to get token from cookie
-// function getToken() {
-//     return document.cookie
-//         .split('; ')
-//         .find(row => row.startsWith('sessionToken='))
-//         ?.split('=')[1];
-// }
-
-// Function to open assign admin modal
-function openAssignAdminModal(orgId) {
-    const modal = document.getElementById('add-admin-modal');
-    if (modal) {
-        // Store the organization ID for use when submitting the form
-        modal.dataset.orgId = orgId;
-        modal.classList.remove('hidden');
-    }
-}
-
-// Function to open edit organization modal
-function openEditOrgModal(orgId) {
-    // Implement edit organization functionality
-    console.log('Edit organization:', orgId);
-}
-
-// Function to delete organization
-function deleteOrganization(orgId) {
-    if (confirm('Are you sure you want to delete this organization?')) {
-        // Implement delete organization functionality
-        console.log('Delete organization:', orgId);
     }
 }
 
