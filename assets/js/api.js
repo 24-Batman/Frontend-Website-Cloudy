@@ -17,5 +17,6 @@ const API_URLS = {
     createUser: "https://mdasriyashtttptrigger.azurewebsites.net/api/createuser?",
     deleteOrgOwner: "https://mdasriyashtttptrigger.azurewebsites.net/api/deleteUser?code=acDiBfLrQ6DEEVzpuMOOCzYvy6XjMzH7bb9JITbt4NucAzFuvDkx9g%3D%3D",
     editOrgOwner: "https://mdasriyashtttptrigger.azurewebsites.net/api/editUserDetails?code=UrPd-nWMiocDlTJod-oZpD7kc37bEHmW5gWKD3aCkpeYAzFuiMjuLA%3D%3D",
+    updateOrg:"https://mdasriyashtttptrigger.azurewebsites.net/api/UpdateOrganization?",
     getUserDetailsById: " https://mdasriyashtttptrigger.azurewebsites.net/api/getUserDetails?"
 };
