@@ -165,7 +165,7 @@ function renderOrganizationsTable(organizations) {
 
     organizations.forEach(org => {
         const row = document.createElement('tr');
-        row.dataset.orgId = org.organizationId; // Add data attribute for org ID
+        row.dataset.orgId = org.organizationId;
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${org.organizationId}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${org.organizationName}</td>
@@ -179,14 +179,14 @@ function renderOrganizationsTable(organizations) {
                     `<span class="text-gray-900">${org.organizationAdminName}</span>`
                 }
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div class="flex space-x-3 justify-end">
+            <td class="px-4 py-4 whitespace-nowrap text-sm">
+                <div class="flex items-center gap-2">
                     <button onclick="openEditOrgModal('${org.organizationId}')" 
-                        class="text-indigo-600 hover:text-indigo-900">
+                        class="p-1 text-indigo-600 hover:text-indigo-900">
                         <i class='bx bx-edit-alt text-xl'></i>
                     </button>
                     <button onclick="deleteOrganization('${org.organizationId}')"
-                        class="text-red-600 hover:text-red-900">
+                        class="p-1 text-red-600 hover:text-red-900">
                         <i class='bx bx-trash text-xl'></i>
                     </button>
                 </div>
