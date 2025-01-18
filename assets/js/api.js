@@ -4,8 +4,13 @@ const API_URLS = {
     createSite: "https://mdashttpusertrigger.azurewebsites.net/api/CreateSite?",
     assignSiteAdmin: "https://mdashttpusertrigger.azurewebsites.net/api/AssignSiteAdmin?",
     getOrgList: "https://mdasriyashtttptrigger.azurewebsites.net/api/getOrganizationList?",
+<<<<<<< HEAD
     createOrg: " https://mdasriyashtttptrigger.azurewebsites.net/api/CreateOrganization?",
     assignOrgAdmin: "https://mdashttpusertrigger.azurewebsites.net/api/assignOrgAdmin?",
+=======
+    createOrg: "https://mdasriyashtttptrigger.azurewebsites.net/api/CreateOrganization?",
+    assignOrgAdmin: "https://mdasriyashtttptrigger.azurewebsites.net/api/assignOrgAdmin?",
+>>>>>>> 86cc9ea68cb2b8886ff7bd4ac0f7075f478055d6
     getNotApprovedPcList: "https://mdashttpusertrigger.azurewebsites.net/api/GetNotApprovedPcList?",
     approvePc: "https://mdashttpusertrigger.azurewebsites.net/api/ApprovePc?code=R0kDA_YwTNWOuP2PJJc1KmM0LJBWWtVe0pe_8TQ0pz5FAzFumx8_OA%3D%3D",
     getMeterList: "https://mdashttpusertrigger.azurewebsites.net/api/GetMeterList?",
@@ -17,5 +22,6 @@ const API_URLS = {
     createUser: "https://mdasriyashtttptrigger.azurewebsites.net/api/createuser?",
     deleteOrgOwner: "https://mdasriyashtttptrigger.azurewebsites.net/api/deleteUser?code=acDiBfLrQ6DEEVzpuMOOCzYvy6XjMzH7bb9JITbt4NucAzFuvDkx9g%3D%3D",
     editOrgOwner: "https://mdasriyashtttptrigger.azurewebsites.net/api/editUserDetails?code=UrPd-nWMiocDlTJod-oZpD7kc37bEHmW5gWKD3aCkpeYAzFuiMjuLA%3D%3D",
+    updateOrg:"https://mdasriyashtttptrigger.azurewebsites.net/api/UpdateOrganization?",
     getUserDetailsById: " https://mdasriyashtttptrigger.azurewebsites.net/api/getUserDetails?"
 };
