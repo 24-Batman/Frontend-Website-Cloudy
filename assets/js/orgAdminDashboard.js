@@ -1,4 +1,75 @@
 const token = getSessionToken();
+// Function to get session token from cookies
+function getSessionToken() {
+    const name = "sessionToken=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookies = decodedCookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i].trim();
+        if (cookie.indexOf(name) === 0) {
+            return cookie.substring(name.length, cookie.length);
+        }
+    }
+    return null;
+}
+
+// Add these toast functions at the top of your file
+const toastTypes = {
+    SUCCESS: 'success',
+    ERROR: 'error',
+    WARNING: 'warning',
+    INFO: 'info'
+};
+
+let toastCount = 0;
+const toastQueue = [];
+
+function showToast(message, type = toastTypes.INFO) {
+    const toast = document.createElement('div');
+    const toastId = toastCount++;
+    
+    toast.className = `fixed right-4 p-4 rounded-lg text-white ${
+        type === toastTypes.SUCCESS ? 'bg-green-500' :
+        type === toastTypes.ERROR ? 'bg-red-500' :
+        type === toastTypes.WARNING ? 'bg-yellow-500' : 'bg-blue-500'
+    } transition-all duration-300 ease-in-out`;
+    
+    toast.style.bottom = `${(toastQueue.length * 4.5)}rem`; // Stack from bottom
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    toastQueue.push({ id: toastId, element: toast });
+    
+    // Remove toast after delay
+    setTimeout(() => {
+        const index = toastQueue.findIndex(t => t.id === toastId);
+        if (index !== -1) {
+            const removedToast = toastQueue.splice(index, 1)[0];
+            removedToast.element.style.opacity = '0';
+            removedToast.element.style.transform = 'translateX(100%)';
+            
+            // Adjust positions of remaining toasts
+            toastQueue.forEach((toast, i) => {
+                toast.element.style.bottom = `${(i * 4.5)}rem`;
+            });
+            
+            setTimeout(() => removedToast.element.remove(), 300);
+        }
+    }, 3000);
+}
+
+// Add modal close function
+function closeAddOwnerModal() {
+    const modal = document.getElementById('add-owner-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+if (!token) {
+    console.error('Error: No session token found');
+    showToast('Error: No session token found', toastTypes.ERROR);
+}
 // Fetch data when the page loads
 fetchSitesData();
 
@@ -30,29 +101,27 @@ document.addEventListener('click', (event) => {
 async function fetchSitesData() {
     const url = 'https://mdasriyashtttptrigger.azurewebsites.net/api/GetSiteList?';
     const response = await fetch(url, {
-        method: 'POST', // Using POST method
+        method: 'POST',
         headers: {
-            'Authorization': `Bearer ${token}`, // Ensure this token is valid
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({}) // No need for a request body if not required
+        body: JSON.stringify({})
     });
 
-    const data = await response.json(); // Parse the JSON response
+    const data = await response.json();
 
-    // Update the UI with fetched data
     document.getElementById('active-sites').textContent = data.sites.length;
     document.getElementById('org-name-label').textContent = `Organization: ${data.orgName}`;
 
-    // Populate the table with fetched data
     const tableBody = document.querySelector('#site-table tbody');
-    tableBody.innerHTML = ''; // Clear the existing table data
+    tableBody.innerHTML = '';
     globalOrgId = data.orgId;
 
-    const colors = ['red', 'green', 'blue']; // Define the color pattern
+    const colors = ['red', 'green', 'blue'];
 
     data.sites.forEach((site, index) => {
-        const color = colors[index % colors.length]; // Cycle through colors
+        const color = colors[index % colors.length];
         const row = document.createElement('tr');
         row.classList.add('hover:bg-gray-50', 'transition-colors');
         row.innerHTML = `
@@ -82,7 +151,7 @@ async function fetchSitesData() {
                     </div>
                     <div class="ml-3">
                         <div class="text-sm font-medium text-gray-900">${site.siteAdminName}</div>
-                        <div class="text-sm text-gray-500">admin@example.com</div>
+                        <div class="text-sm text-gray-500">${site.siteAdminEmail || 'No email available'}</div>
                     </div>
                 </div>` : `
                 <button class="add-admin-btn px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2" data-id="${site.siteId}">
@@ -152,8 +221,8 @@ document.getElementById('close-site-modal-btn').addEventListener('click', () => 
     adminAddSiteId = null;
 });
 
-// Function to open the Add Site modal
-document.querySelector('.bg-indigo-600').addEventListener('click', () => {
+// Open the Add Site modal when the button is clicked
+document.getElementById('add-site-btn').addEventListener('click', () => {
     document.getElementById('add-site-modal').classList.remove('hidden');
 });
 
@@ -169,12 +238,12 @@ document.getElementById('add-site-form').addEventListener('submit', async (e) =>
     // Gather form data
     const siteData = {
         siteName: document.getElementById('site-name').value,
-        siteAddress: document.getElementById('site-address').value,
-        orgId: globalOrgId
+        siteAddress: document.getElementById('site-address').value
     };
 
+    console.log('Site Data:', siteData); // Debugging line
+
     try {
-        // Make the API request
         const response = await fetch('https://mdasriyashtttptrigger.azurewebsites.net/api/CreateSite?', {
             method: 'POST',
             headers: {
@@ -187,65 +256,61 @@ document.getElementById('add-site-form').addEventListener('submit', async (e) =>
         const result = await response.json();
 
         if (response.ok && result.status === 'success') {
-            // Hide the modal after successful creation
             document.getElementById('add-site-modal').classList.add('hidden');
-
-            // Refresh the site list
             fetchSitesData();
-
-            // Provide feedback to the user
-            alert(result.message || 'Site created successfully');
+            showToast(result.message || 'Site created successfully', toastTypes.SUCCESS);
         } else {
-            // Handle errors
-            alert('Error: ' + (result.message || 'Failed to add site'));
+            showToast('Error: ' + (result.message || 'Failed to add site'), toastTypes.ERROR);
         }
     } catch (error) {
         console.error('Error creating site:', error);
-        alert('Error: Failed to create site');
+        showToast('Error: Failed to create site', toastTypes.ERROR);
     }
 });
 
-// Submit the form to add a new admin
+async function assignSiteAdmin(siteId, adminData) {
+    try {
+        const response = await fetch('https://mdasriyashtttptrigger.azurewebsites.net/api/AssignSiteAdmin?', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`, // Ensure this token is valid
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ...adminData, siteId }) // Include siteId in the request
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.status === 'success') {
+            showToast(result.message || 'Site admin assigned successfully', toastTypes.SUCCESS);
+            updateSiteAdminUI(siteId, adminData); // Update the UI with the new admin data
+        } else {
+            showToast('Error: ' + (result.message || 'Failed to assign site admin'), toastTypes.ERROR);
+        }
+    } catch (error) {
+        console.error('Error assigning site admin:', error);
+        showToast('Error: Failed to assign site admin', toastTypes.ERROR);
+    }
+}
+
+// Submit the form to add a new admin dynamically
 document.getElementById('add-admin-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+
     // Gather form data
     const adminData = {
-        siteId: adminAddSiteId,
+        orgId: globalOrgId,
         userEmail: document.getElementById('admin-email').value,
-        password: document.getElementById('admin-password').value, // Example password, adjust as needed
-        userRole: "Site Admin",
+        password: document.getElementById('admin-password').value,
         userName: document.getElementById('admin-name').value,
         userMobile1: document.getElementById('admin-mobile1').value,
-        userMobile2: document.getElementById('admin-mobile2') ? document.getElementById('admin-mobile2').value : "", // Optional field
-        userGender: document.getElementById('admin-gender').value, // Default gender, adjust as needed
+        userMobile2: document.getElementById('admin-mobile2').value || "",
+        userGender: document.getElementById('admin-gender').value,
         userAddress: document.getElementById('admin-address').value
     };
 
-    // Make the API request
-    const response = await fetch(API_URLS.assignSiteAdmin, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,  // Replace with actual Auth token
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(adminData)
-    });
-
-    const result = await response.json();
-
-    if (response.ok && result.status === 'success') {
-        // Hide the modal after successful creation
-        document.getElementById('add-admin-modal').classList.add('hidden');
-
-        // Optionally, refresh the admin list or dashboard
-        fetchSitesData(); // Call your function to update the dashboard with new admin details
-
-        // Optional: Provide feedback to the user
-        alert(result.message); // User feedback (success message)
-    } else {
-        // Handle errors
-        alert('Error: ' + (result.message || 'Failed to add admin'));
-    }
+    await assignSiteAdmin(adminAddSiteId, adminData);
+    document.getElementById('add-admin-modal').classList.add('hidden');
 });
 
 function getSessionToken() {
@@ -287,4 +352,208 @@ document.getElementById('add-admin-form').addEventListener('submit', function(e)
     
     // Temporarily hide modal after submission
     document.getElementById('add-admin-modal').classList.add('hidden');
+});
+
+function updateSiteAdminUI(siteId, adminData) {
+    const siteRow = document.querySelector(`[data-site-id="${siteId}"]`);
+    if (siteRow) {
+        const adminCell = siteRow.querySelector('.admin-cell');
+        adminCell.innerHTML = `
+            <div class="flex items-center">
+                <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span class="text-sm font-medium text-gray-600">${adminData.userName.charAt(0)}</span>
+                </div>
+                <div class="ml-3">
+                    <div class="text-sm font-medium text-gray-900">${adminData.userName}</div>
+                    <div class="text-sm text-gray-500">${adminData.userEmail}</div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Function to handle logout
+function handleLogout() {
+    // Clear any stored session data
+    localStorage.removeItem('sessionToken');
+    sessionStorage.removeItem('sessionToken');
+
+    // Redirect to the login page
+    window.location.href = '/login.html';
+}
+
+// Attach the logout function to a button
+document.getElementById('logout-btn').addEventListener('click', handleLogout);
+
+// Function to update the profile section
+function updateProfileSection() {
+    const storedDetails = localStorage.getItem('userDetails');
+    if (!storedDetails) {
+        console.log('No stored details found');
+        return;
+    }
+
+    try {
+        const userDetails = JSON.parse(storedDetails);
+        
+        // Update profile avatar initials
+        const profileInitials = document.getElementById('profile-initials');
+        if (profileInitials) {
+            profileInitials.textContent = userDetails.initials || 'OA'; // Default initials
+        }
+
+        // Update name and email
+        const profileName = document.getElementById('profile-name');
+        if (profileName) {
+            profileName.textContent = userDetails.name || 'Org Admin'; // Default name
+        }
+
+        const profileEmail = document.getElementById('profile-email');
+        if (profileEmail) {
+            profileEmail.textContent = userDetails.email || 'orgadmin@example.com'; // Default email
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+    }
+}
+
+// Call the function to update the profile section when the DOM is loaded
+document.addEventListener('DOMContentLoaded', updateProfileSection);
+
+// Add visual feedback functions
+function addVisualFeedback() {
+    // Add hover effects to cards (if any)
+    document.querySelectorAll('.stats-card').forEach(card => {
+        card.classList.add('card-hover');
+    });
+
+    // Add hover effects to table rows
+    document.querySelectorAll('#site-table tbody tr').forEach(row => {
+        row.classList.add('table-row-hover');
+    });
+
+    // Add input feedback
+    document.querySelectorAll('input').forEach(input => {
+        input.classList.add('input-primary');
+
+        // Add validation feedback
+        input.addEventListener('input', function() {
+            if (this.checkValidity()) {
+                this.classList.remove('input-error');
+                this.classList.add('input-success');
+            } else {
+                this.classList.remove('input-success');
+                this.classList.add('input-error');
+            }
+        });
+    });
+
+    // Add button feedback
+    document.querySelectorAll('button').forEach(button => {
+        if (button.classList.contains('btn-primary')) {
+            button.addEventListener('click', function() {
+                this.classList.add('transform', 'scale-95');
+                setTimeout(() => {
+                    this.classList.remove('transform', 'scale-95');
+                }, 200);
+            });
+        }
+    });
+}
+
+// Loading state feedback
+function showLoading(element) {
+    const originalContent = element.innerHTML;
+    element.setAttribute('data-original-content', originalContent);
+    element.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Loading...</span>
+        </div>
+    `;
+    element.disabled = true;
+}
+
+function hideLoading(element) {
+    const originalContent = element.getAttribute('data-original-content');
+    element.innerHTML = originalContent;
+    element.disabled = false;
+}
+
+// Add search functionality
+const searchInput = document.getElementById('site-search');
+if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const tableRows = document.querySelectorAll('#site-table tbody tr:not(#no-results)');
+        const noResults = document.getElementById('no-results');
+        let hasResults = false;
+
+        tableRows.forEach(row => {
+            const siteName = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+            if (siteName.includes(searchTerm)) {
+                row.style.display = '';
+                hasResults = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Show/hide no results message
+        if (!hasResults && searchTerm !== '') {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    });
+}
+
+// Add logout animation function
+function animateLogout(callback) {
+    const logoutBtn = document.querySelector('#logout-btn');
+    if (!logoutBtn) return callback();
+
+    // Store original button content
+    const originalContent = logoutBtn.innerHTML;
+
+    // Add spinner and "Logging out..." text
+    logoutBtn.innerHTML = `
+        <div class="flex items-center justify-center space-x-2">
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Logging out...</span>
+        </div>
+    `;
+
+    // Disable the button
+    logoutBtn.disabled = true;
+
+    // Wait for animation and then execute callback
+    setTimeout(callback, 1000);
+}
+
+// Update the handleLogout function with all cleanup
+function handleLogout() {
+    animateLogout(() => {
+        // Clear localStorage
+        localStorage.removeItem('userDetails');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userPassword');
+
+        // Clear session cookie
+        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+        // Redirect to login page
+        window.location.href = '/login.html';
+    });
+}
+
+// Initialize visual feedback
+document.addEventListener('DOMContentLoaded', function() {
+    addVisualFeedback();
 });
