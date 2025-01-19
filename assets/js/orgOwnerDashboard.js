@@ -200,10 +200,17 @@ function addOrganization(){
     document.getElementById('add-organization-modal').classList.remove('hidden');
 }
 
+function closeadminmodal(){
+    document.getElementById('add-admin-modal').classList.add('hidden');
+    document.getElementById('add-admin-form').reset();
+    adminAddOrgId = null;
+}
+
 function closeAddOrgModal(){
     const modal = document.getElementById('add-organization-modal');
     const form = document.getElementById('add-organization-form');
-    
+    const overlay = document.getElementById('overlay');
+    overlay.classList.add('hidden');
     modal.classList.add('hidden');
     form.reset();
     
@@ -222,8 +229,16 @@ function openAssignAdminModal(orgId) {
 }
 
 function closeAssignAdminModal() {
-    document.getElementById('add-admin-modal').classList.add('hidden');
-    document.getElementById('add-admin-form').reset();
+    const model = document.getElementById('add-admin-modal');
+    const form = document.getElementById('add-admin-form');
+    const overlay = document.getElementById('overlay');
+    
+    model.classList.add('hidden');
+    overlay.classList.add('hidden');
+    
+    if (form) {
+        form.reset();
+    }
     adminAddOrgId = null;
 }
 
@@ -479,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchOrganizationsData();
     renderPCRequests();
     handleLogout();
-    
+    closeadminmodal();
 
     // Add event listeners for modal close buttons
     document.getElementById('close-admin-modal-btn')?.addEventListener('click', closeAssignAdminModal);
