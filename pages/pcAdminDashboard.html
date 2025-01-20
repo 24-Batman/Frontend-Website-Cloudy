@@ -9,59 +9,32 @@
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <script src="https://unpkg.com/flowbite@1.6.5/dist/flowbite.js"></script>
     <style>
-        /* Custom scrollbar styling */
-        .custom-scroll::-webkit-scrollbar {
-            width: 8px;
+
+        .dropdown-item {
+            transition: all 0.2s ease;
         }
 
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #f3f4f6;
-            /* Matches card's background */
-            border-radius: 4px;
+        .dropdown-item:hover {
+            transform: translateX(4px);
         }
 
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background-color: #a78bfa;
-            /* Matches card's purple accent */
-            border-radius: 4px;
-            border: 2px solid #f3f4f6;
-            /* Adds a border for a modern look */
-        }
-
-        .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background-color: #7c3aed;
-            /* Darker purple for hover */
-        }
-
-        /* Hide scrollbar for non-WebKit browsers */
-        .custom-scroll {
-            scrollbar-width: thin;
-            /* Firefox: thin scrollbar */
-            scrollbar-color: #a78bfa #f3f4f6;
-            /* Thumb and track colors */
-        }
-
-        .custom-scroll {
-            scrollbar-width: thin;
-            scrollbar-color: transparent transparent;
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;     /* Firefox */
         }
         
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;  /* Chrome, Safari and Opera */
         }
         
-        .custom-scroll::-webkit-scrollbar-track {
-            background: transparent;
+        /* For the PC dropdown specifically */
+        #pc-options-panel .p-2 {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background-color: rgba(156, 163, 175, 0.5);
-            border-radius: 3px;
-        }
-        
-        .custom-scroll:hover::-webkit-scrollbar-thumb {
-            background-color: rgba(156, 163, 175, 0.8);
+        #pc-options-panel .p-2::-webkit-scrollbar {
+            display: none;
         }
     </style>
 
@@ -218,7 +191,7 @@
                         <div>
                             <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Total Meters</h3>
                             <div class="flex items-center mt-2">
-                                <div class="text-3xl font-bold text-gray-900">8</div>
+                                <div class="text-3xl font-bold text-gray-900" id="total-meters-count">8</div>
                                 <div class="flex items-center ml-2 text-green-500 text-sm">
                                 </div>
                             </div>
@@ -244,41 +217,34 @@
                     class="bg-white rounded-2xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Current PC</h3>
-                            <div class="flex items-center mt-2 relative">
-                                <!-- Custom Dropdown Wrapper -->
-                                <div class="relative bg-transparent text-3xl font-bold text-gray-900">
-                                    <select
-                                        class="appearance-none block w-full bg-transparent border-none focus:ring-0 focus:outline-none h-10 overflow-y-auto custom-scroll rounded-lg"
-                                        size="4">
-                                        <!-- Dropdown options -->
-                                        <option value="1">PC 1</option>
-                                        <option value="2">PC 2</option>
-                                        <option value="3">PC 3</option>
-                                        <option value="4">PC 4</option>
-                                        <option value="5">PC 5</option>
-                                        <option value="6">PC 6</option>
-                                        <option value="7">PC 7</option>
-                                        <option value="8">PC 8</option>
-                                        <option value="9">PC 9</option>
-                                        <option value="10">PC 10</option>
-                                        <option value="11">PC 11</option>
-                                        <option value="12">PC 12</option>
-                                    </select>
-                                </div>
-                                <div class="flex items-center ml-2 text-purple-500 text-sm">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
+                            <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">CURRENT PC</h3>
+                            <div class="relative mt-2">
+                                <button id="pc-select-btn" 
+                                    class="w-full flex items-center justify-between gap-2 px-4 py-2 text-3xl font-bold text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <div class="flex items-center gap-3">
+                                        <span id="selected-pc">PC 1</span>
+                                        <span class="text-xs px-2 py-1 bg-purple-100 text-purple-600 rounded-full">Active</span>
+                                    </div>
+                                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                     </svg>
-                                    <span class="ml-1">Active</span>
+                                </button>
+
+                                <!-- Dropdown Panel -->
+                                <div id="pc-options-panel" 
+                                    class="hidden absolute left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 z-90">
+                                    <div class="p-2 max-h-64 overflow-y-auto">
+                                        <div class="space-y-1" id="pc-options-list">
+                                            <!-- PC options will be dynamically inserted here -->
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="p-3 bg-purple-100 rounded-full">
                             <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
                         </div>
                     </div>
@@ -309,9 +275,9 @@
                     </div>
                 </div>
                 <div class="p-6">
-                    <div class="overflow-x-auto">
-                        <table id="meter-table" class="min-w-full divide-y divide-gray-200">
-                            <thead>
+                    <div class="overflow-x-auto max-h-[230px] overflow-y-auto scrollbar-hide">
+                        <table id="meter-table" class="min-w-full divide-y divide-gray-200 scrollbar-hide">
+                            <thead id="meter-table-header" class="bg-gray-100">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                         Meter Num
@@ -336,127 +302,179 @@
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                
-                                </tr>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Remove any default N/A rows -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
             <!-- Meter Modal -->
-<div id="meter-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg shadow-lg p-4 w-full max-w-6xl mx-4 my-4 sm:mx-auto max-h-[90vh] overflow-y-auto">
-        <!-- Header Section -->
-        <div class="mb-4">
-            <h2 class="text-2xl font-bold" id="modal-meter-num">Meter Num: Loading...</h2>
-            <h3 class="text-xl font-medium mb-2" id="modal-meter-name">Meter Name: Loading...</h3>
-            <span id="meter-status" class="px-3 py-1 text-sm text-white bg-green-500 rounded-full">Status: Active</span>
-        </div>
+            <div id="meter-modal"
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+                <div
+                    class="bg-white rounded-lg shadow-lg p-4 w-full max-w-6xl mx-4 my-4 sm:mx-auto max-h-[90vh] overflow-y-auto">
+                    <!-- Header Section -->
+                    <div class="mb-4">
+                        <h2 class="text-2xl font-bold" id="modal-meter-num">Meter Num: Loading...</h2>
+                        <h3 class="text-xl font-medium mb-2" id="modal-meter-name">Meter Name: Loading...</h3>
+                        <span id="meter-status" class="px-3 py-1 text-sm text-white bg-green-500 rounded-full">Status:
+                            Active</span>
+                    </div>
 
-        <!-- Analytics Overview Section -->
-        <div class="bg-gray-50 rounded-xl p-4 mb-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-3">Analytics Overview</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                <input type="date" id="start-date" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Start Date">
-                <select id="time-range" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="0">None</option>
-                    <option value="1">Last 1 day</option>
-                    <option value="10">Last 10 days</option>
-                    <option value="30">Last 30 days</option>
-                </select>
-                <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
-                    <i class='bx bx-filter'></i>
-                    Apply Filter
-                </button>
-                <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-                    <i class='bx bx-export'></i>
-                    Export Data
-                </button>
-            </div>
-        </div>
+                    <!-- Analytics Overview Section -->
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-3">Analytics Overview</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                            <input type="date" id="start-date"
+                                class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Start Date">
+                            <select id="time-range"
+                                class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="0">None</option>
+                                <option value="1">Last 1 day</option>
+                                <option value="10">Last 10 days</option>
+                                <option value="30">Last 30 days</option>
+                            </select>
+                            <button
+                                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
+                                <i class='bx bx-filter'></i>
+                                Apply Filter
+                            </button>
+                            <button
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                                <i class='bx bx-export'></i>
+                                Export Data
+                            </button>
+                        </div>
+                    </div>
 
-        <!-- Table Section with invisible scrollbar -->
-        <div class="overflow-x-auto custom-scroll">
-            <table class="min-w-full divide-y divide-gray-200" id="modal-meter-table">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2 text-slate-600">S. No</th>
-                        <th class="px-4 py-2 text-slate-600">Data Count</th>
-                        <th class="px-4 py-2 text-slate-600">Time Stamp</th>
-                        <th class="px-4 py-2 text-slate-600">V12</th>
-                        <th class="px-4 py-2 text-slate-600">V23</th>
-                        <th class="px-4 py-2 text-slate-600">V31</th>
-                        <th class="px-4 py-2 text-slate-600">I1</th>
-                        <th class="px-4 py-2 text-slate-600">I2</th>
-                        <th class="px-4 py-2 text-slate-600">I3</th>
-                        <th class="px-4 py-2 text-slate-600">Kw</th>
-                        <th class="px-4 py-2 text-slate-600">Kva</th>
-                        <th class="px-4 py-2 text-slate-600">Kvar</th>
-                        <th class="px-4 py-2 text-slate-600">Pf</th>
-                        <th class="px-4 py-2 text-slate-600">Hz</th>
-                        <th class="px-4 py-2 text-slate-600">Kwh</th>
-                        <th class="px-4 py-2 text-slate-600">Kvah</th>
-                        <th class="px-4 py-2 text-slate-600">P Flag</th>
-                        <th class="px-4 py-2 text-slate-600">L Flag</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200" id="modal-data-rows">
-                    <!-- Dynamic modal data content goes here -->
-                </tbody>
-            </table>
-        </div>
+                    <!-- Table Section with invisible scrollbar -->
+                    <div class="overflow-x-auto custom-scroll">
+                        <table class="min-w-full divide-y divide-gray-200" id="modal-meter-table">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-4 py-2 text-slate-600">S. No</th>
+                                    <th class="px-4 py-2 text-slate-600">Data Count</th>
+                                    <th class="px-4 py-2 text-slate-600">Time Stamp</th>
+                                    <th class="px-4 py-2 text-slate-600">V12</th>
+                                    <th class="px-4 py-2 text-slate-600">V23</th>
+                                    <th class="px-4 py-2 text-slate-600">V31</th>
+                                    <th class="px-4 py-2 text-slate-600">I1</th>
+                                    <th class="px-4 py-2 text-slate-600">I2</th>
+                                    <th class="px-4 py-2 text-slate-600">I3</th>
+                                    <th class="px-4 py-2 text-slate-600">Kw</th>
+                                    <th class="px-4 py-2 text-slate-600">Kva</th>
+                                    <th class="px-4 py-2 text-slate-600">Kvar</th>
+                                    <th class="px-4 py-2 text-slate-600">Pf</th>
+                                    <th class="px-4 py-2 text-slate-600">Hz</th>
+                                    <th class="px-4 py-2 text-slate-600">Kwh</th>
+                                    <th class="px-4 py-2 text-slate-600">Kvah</th>
+                                    <th class="px-4 py-2 text-slate-600">P Flag</th>
+                                    <th class="px-4 py-2 text-slate-600">L Flag</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200" id="modal-data-rows">
+                                <!-- Dynamic modal data content goes here -->
+                            </tbody>
+                        </table>
+                    </div>
 
-        <!-- Footer Section -->
-        <div class="mt-4 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div class="flex items-center gap-3 w-full sm:w-auto">
-                <button id="close-meter-modal-btn" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
-                    Back
-                </button>
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-600">Rows per page:</span>
-                    <select id="rows-per-page" class="px-2 py-1 border rounded-lg text-sm">
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
+                    <!-- Footer Section -->
+                    <div class="mt-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <button id="close-meter-modal-btn"
+                                class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                                Back
+                            </button>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-600">Rows per page:</span>
+                                <select id="rows-per-page" class="px-2 py-1 border rounded-lg text-sm">
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500" id="modal-pagination-info">
+                            Showing 1 to 10 of 100 entries
+                        </div>
+                        <div class="flex space-x-2" id="modal-pagination">
+                            <!-- Pagination buttons will be inserted here -->
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="text-sm text-gray-500" id="modal-pagination-info">
-                Showing 1 to 10 of 100 entries
-            </div>
-            <div class="flex space-x-2" id="modal-pagination">
-                <!-- Pagination buttons will be inserted here -->
-            </div>
-        </div>
-    </div>
-</div>
 
             <script type="text/javascript" src="../assets/js/api.js"></script>
             <script src="../assets/js/pcAdminDashboard.js"></script>
             <script>
-            document.querySelector('input[type="text"]').addEventListener('input', function() {
-                const query = this.value.toLowerCase();
-                const rows = document.querySelectorAll('#meter-table tbody tr');
-                const noResults = document.getElementById('no-results');
-                let hasVisibleRows = false;
-                
-                rows.forEach(row => {
-                    const meterName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                    const isVisible = meterName.includes(query);
-                    row.style.display = isVisible ? '' : 'none';
-                    if (isVisible) hasVisibleRows = true;
-                });
+                document.querySelector('input[type="text"]').addEventListener('input', function () {
+                    const query = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('#meter-table tbody tr');
+                    const noResults = document.getElementById('no-results');
+                    let hasVisibleRows = false;
 
-                // Show/hide the no results message
-                noResults.style.display = hasVisibleRows ? 'none' : 'block';
-                
-                // Hide/show the table based on results
-                const tableBody = document.querySelector('#meter-table tbody');
-                tableBody.style.display = hasVisibleRows ? '' : 'none';
-            });
+                    rows.forEach(row => {
+                        const meterName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                        const isVisible = meterName.includes(query);
+                        row.style.display = isVisible ? '' : 'none';
+                        if (isVisible) hasVisibleRows = true;
+                    });
+
+                    // Show/hide the no results message
+                    noResults.style.display = hasVisibleRows ? 'none' : 'block';
+
+                    // Hide/show the table based on results
+                    const tableBody = document.querySelector('#meter-table tbody');
+                    tableBody.style.display = hasVisibleRows ? '' : 'none';
+                });
             </script>
+
+    <!-- Overlay -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+
+    <!-- Meter Modal -->
+    <div id="meter-modal" class="fixed inset-0 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-7xl mx-4 max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900">Meter Details</h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-auto p-6">
+                <!-- Table Container -->
+                <div class="overflow-x-auto">
+                    <table id="meter-details-table" class="min-w-full divide-y divide-gray-200">
+                        <!-- Table headers -->
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <!-- Add your table headers here -->
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Data will be dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal Footer with Pagination -->
+            <div class="px-6 py-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div id="modal-pagination-info"></div>
+                    <div id="modal-pagination" class="flex space-x-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
