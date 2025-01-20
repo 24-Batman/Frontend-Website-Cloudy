@@ -5,10 +5,68 @@ let currentPage = 1;
 let pageSize = 10;
 let globalMeterId = null;
 
+// Constants
+const PAGE_SIZE = 10; // Items per page for pagination
+
+// DOM Elements
+const DOM = {
+    tableBody: () => document.querySelector('#meter-table tbody'),
+    modal: () => document.getElementById('meter-modal'),
+    overlay: () => document.getElementById('overlay'),
+    closeModalBtn: () => document.getElementById('close-modal-btn'),
+    paginationInfo: () => document.getElementById('modal-pagination-info'),
+    paginationContainer: () => document.getElementById('modal-pagination'),
+    pcSelectBtn: () => document.getElementById('pc-select-btn'),
+    pcOptionsPanel: () => document.getElementById('pc-options-panel'),
+    pcOptionsList: () => document.getElementById('pc-options-list'),
+    selectedPcText: () => document.getElementById('selected-pc')
+};
+
+// Function to get session token from cookies
+function getSessionToken() {
+    const name = "sessionToken=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookies = decodedCookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i].trim();
+        if (cookie.indexOf(name) === 0) {
+            return cookie.substring(name.length, cookie.length);
+        }
+    }
+    return null;
+}
+
+// Toast notification system
+const toastTypes = {
+    SUCCESS: 'success',
+    ERROR: 'error',
+    WARNING: 'warning',
+    INFO: 'info'
+};
+
+function showToast(message, type = toastTypes.INFO) {
+    const toast = document.createElement('div');
+    toast.className = `fixed right-4 p-4 rounded-lg text-white ${
+        type === toastTypes.SUCCESS ? 'bg-green-500' :
+        type === toastTypes.ERROR ? 'bg-red-500' :
+        type === toastTypes.WARNING ? 'bg-yellow-500' : 'bg-blue-500'
+    } transition-all duration-300 ease-in-out z-50`;
+    
+    toast.style.top = '1rem';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 // Initialize when document loads
-document.addEventListener('DOMContentLoaded', () => {
-    fetchMeterList();
+document.addEventListener('DOMContentLoaded', async () => {
+    await fetchMeterList();
     setupEventListeners();
+    setupPcSelector();
 });
 
 async function fetchMeterList() {
@@ -23,13 +81,14 @@ async function fetchMeterList() {
         });
 
         const data = await response.json();
+        console.log('API Response:', data); // For debugging
         
         if (!response.ok) {
             throw new Error(data.message || 'Failed to fetch meter list');
         }
 
         updateMeterTable(data);
-        updateMeterCount(data);
+        updateDashboardStats(data);
 
     } catch (error) {
         console.error('Error fetching meter list:', error);
@@ -55,57 +114,63 @@ function updateMeterTable(data) {
     data.meterList.forEach(meter => {
         const row = document.createElement('tr');
         row.className = 'hover:bg-gray-50 transition-colors';
-        row.setAttribute('data-meter-id', meter.meterId || 'N/A');
-
-        const healthStatus = meter.meterHealthStatus || 'Unknown';
-        const statusClass = getStatusClass(healthStatus);
-
+        
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">${meter.meterNum || 'N/A'}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">${meter.meterName || 'N/A'}</div>
+                <div class="text-sm font-medium text-gray-900">${meter.meterName }</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${meter.make || 'N/A'}</div>
+                <div class="text-sm text-gray-900">${meter.make }</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${meter.kwAvg || '0'}</div>
+                <div class="text-sm text-gray-900">${meter.kwAvg }</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${meter.nRec || '0'}</div>
+                <div class="text-sm text-gray-900">${meter.nRec }</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-                <span class="${statusClass}">
-                    ${healthStatus}
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    meter.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }">
+                    ${meter.isActive ? 'Active' : 'Inactive'}
                 </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <div class="flex space-x-3">
-                    <button class="text-indigo-600 hover:text-indigo-900 transition-colors view-meter-btn">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                    </button>
-                </div>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <button class="text-indigo-600 hover:text-indigo-900" onclick="viewMeterDetails('${meter.meterId}')">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </button>
             </td>
         `;
         tableBody.appendChild(row);
     });
 }
 
-function getStatusClass(status) {
-    const statusClasses = {
-        'Healthy': 'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800',
-        'Warning': 'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800',
-        'Critical': 'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800',
-        'Unknown': 'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800'
-    };
-    return statusClasses[status] || statusClasses['Unknown'];
+function updateDashboardStats(data) {
+    // Update organization name
+    const orgNameLabel = document.getElementById('org-name-label');
+    if (orgNameLabel) {
+        orgNameLabel.textContent = data.orgName || 'N/A';
+    }
+
+    // Update total meters count
+    const totalMetersElement = document.getElementById('total-meters-count');
+    if (totalMetersElement) {
+        totalMetersElement.textContent = data.meterList?.length || '0';
+    }
+
+    // Update current site name
+    const activeSitesElement = document.getElementById('active-sites');
+    if (activeSitesElement) {
+        activeSitesElement.textContent = data.siteName || 'N/A';
+    }
 }
 
 function showNoMetersMessage() {
@@ -128,32 +193,21 @@ function showNoMetersMessage() {
     `;
 }
 
-function updateMeterCount(data) {
-    const totalMetersElement = document.querySelector('.text-3xl.font-bold.text-gray-900');
-    if (totalMetersElement) {
-        const meterCount = data.meterList?.length || 0;
-        totalMetersElement.textContent = meterCount;
-        
-        // Update the status message below the count
-        const statusElement = document.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
-        if (statusElement) {
-            if (meterCount > 0) {
-                statusElement.innerHTML = `
-                    <div class="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
-                    All Meters Connected
-                `;
-            } else {
-                statusElement.innerHTML = `
-                    <div class="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
-                    No Meters Available
-                `;
-            }
-        }
+function setupEventListeners() {
+    // Search functionality
+    const searchInput = document.querySelector('input[type="text"]');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#meter-table tbody tr');
+            
+            rows.forEach(row => {
+                const meterName = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase();
+                row.style.display = meterName?.includes(query) ? '' : 'none';
+            });
+        });
     }
-}
 
-// Event listener for analytics button clicks
-document.addEventListener('DOMContentLoaded', () => {
     // Add click event listener to the meter table
     document.querySelector('#meter-table tbody').addEventListener('click', async (e) => {
         const row = e.target.closest('tr');
@@ -295,7 +349,20 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
     });
-});
+
+    // Add close button event listener
+    document.getElementById('close-modal-btn')?.addEventListener('click', closeMeterModal);
+    
+    // Add close on overlay click
+    document.getElementById('overlay')?.addEventListener('click', closeMeterModal);
+    
+    // Add escape key listener
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeMeterModal();
+        }
+    });
+}
 
 function generateSampleData() {
     const data = [];
@@ -631,4 +698,153 @@ function exportTableData() {
         console.error('Export failed:', error);
         alert('Failed to export data. Please try again.');
     }
+}
+
+function setupPcSelector() {
+    const selectBtn = document.getElementById('pc-select-btn');
+    const optionsPanel = document.getElementById('pc-options-panel');
+    const optionsList = document.getElementById('pc-options-list');
+    const selectedPcText = document.getElementById('selected-pc');
+    const arrow = selectBtn?.querySelector('svg');
+    
+    // Generate PC options
+    const pcCount = 12; // Can be dynamic based on your data
+    if (optionsList) {
+        for (let i = 1; i <= pcCount; i++) {
+            const option = document.createElement('button');
+            option.className = `w-full px-4 py-2 text-left text-gray-700 hover:bg-indigo-50 rounded-md flex items-center justify-between group transition-colors ${i === 1 ? 'bg-indigo-50' : ''}`;
+            option.innerHTML = `
+                <span class="font-medium">PC ${i}</span>
+                <svg class="w-5 h-5 text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" 
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            `;
+            
+            option.addEventListener('click', () => {
+                selectedPcText.textContent = `PC ${i}`;
+                togglePanel(false);
+                handlePcSelection(i);
+                
+                // Update active state
+                optionsList.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('bg-indigo-50');
+                });
+                option.classList.add('bg-indigo-50');
+            });
+            
+            optionsList.appendChild(option);
+        }
+    }
+
+    // Toggle panel visibility
+    function togglePanel(show) {
+        if (show === undefined) {
+            show = optionsPanel?.classList.contains('hidden');
+        }
+        
+        optionsPanel?.classList.toggle('hidden', !show);
+        arrow?.style.setProperty('transform', show ? 'rotate(180deg)' : 'rotate(0)');
+    }
+
+    // Event listeners
+    selectBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePanel();
+    });
+
+    // Close panel when clicking outside
+    document.addEventListener('click', () => {
+        togglePanel(false);
+    });
+
+    // Prevent panel close when clicking inside
+    optionsPanel?.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    // Add keyboard navigation
+    selectBtn?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            togglePanel();
+        }
+    });
+}
+
+function handlePcSelection(pcNumber) {
+    console.log(`Selected PC ${pcNumber}`);
+    // Add your PC selection logic here
+    // This might include fetching new data, updating UI, etc.
+}
+
+// Add this function to handle meter view
+function viewMeterDetails(meterId) {
+    const modal = document.getElementById('meter-modal');
+    const overlay = document.getElementById('overlay');
+    
+    if (!modal || !overlay) return;
+
+    // Store the meter ID globally for use in modal
+    globalMeterId = meterId;
+    
+    // Reset page to 1 when opening modal
+    currentPage = 1;
+    
+    // Fetch and display meter data
+    fetchMeterData(meterId);
+    
+    // Show modal and overlay
+    modal.classList.remove('hidden');
+    overlay.classList.remove('hidden');
+    
+    // Initialize pagination
+    setupPagination();
+}
+
+// Add function to fetch meter data
+async function fetchMeterData(meterId) {
+    try {
+        const response = await fetch(API_URLS.getMeterData, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ meterId: meterId })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to fetch meter data');
+        }
+
+        // Store meter data globally
+        meterData = data;
+        
+        // Render the first page of data
+        renderTable(currentPage);
+
+    } catch (error) {
+        console.error('Error fetching meter data:', error);
+        showToast('Error loading meter data', toastTypes.ERROR);
+    }
+}
+
+// Add close modal function
+function closeMeterModal() {
+    const modal = document.getElementById('meter-modal');
+    const overlay = document.getElementById('overlay');
+    
+    if (!modal || !overlay) return;
+    
+    modal.classList.add('hidden');
+    overlay.classList.add('hidden');
+    
+    // Clear global meter ID
+    globalMeterId = null;
+    
+    // Clear meter data
+    meterData = [];
 }
