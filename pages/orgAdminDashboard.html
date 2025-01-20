@@ -18,6 +18,68 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* Hover effect for table rows */
+        #site-table tbody tr {
+            transition: all 0.2s ease-in-out;
+        }
+
+        #site-table tbody tr:hover,
+        #site-table tbody tr:active {
+            background-color: #f8fafc;
+            transform: scale(1.01);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        /* Style for action buttons */
+        .action-btn {
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .edit-btn {
+            color: rgb(79, 70, 229);
+        }
+
+        .edit-btn:hover,
+        .edit-btn:active {
+            background-color: rgb(238, 242, 255);
+        }
+
+        .delete-btn {
+            color: rgb(220, 38, 38);
+        }
+
+        .delete-btn:hover,
+        .delete-btn:active {
+            background-color: rgb(254, 242, 242);
+        }
+
+        /* Button States */
+        .btn-primary {
+            padding: 1rem 1.5rem;
+            background-color: rgb(79, 70, 229);
+            color: white;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:active {
+            background-color: rgb(67, 56, 202);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:focus {
+            outline: none;
+            --tw-ring-offset-width: 2px;
+            --tw-ring-color: rgb(99, 102, 241);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 
@@ -42,8 +104,8 @@
                 </div>
                 <div class="flex items-center">
                     <div class="flex items-center ml-3">
-                        <button onclick="handleLogout()"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2">
+                        <!-- Add this button in your HTML where appropriate -->
+                        <button id="logout-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2">
                             <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -92,6 +154,19 @@
                     </a>
                 </li>
             </ul>
+            <div class="profile-section absolute bottom-0 left-0 w-full p-4 border-t border-indigo-700">
+                <div class="flex items-center space-x-3 text-white">
+                    <div class="flex-shrink-0">
+                        <div class="profile-avatar w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center">
+                            <span class="text-lg font-semibold" id="profile-initials">OA</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="profile-info-name text-sm font-medium truncate" id="profile-name">Org Admin Name</p>
+                        <p class="profile-info-email text-xs text-indigo-300 truncate" id="profile-email">orgadmin@example.com</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </aside>
 
@@ -171,13 +246,12 @@
                         <div>
                             <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Active Admins</h3>
                             <div class="flex items-center mt-2">
-                                <div class="text-3xl font-bold text-gray-900">8</div>
+                                <div class="text-3xl font-bold text-gray-900" id="active-admins-count">0</div>
                                 <div class="flex items-center ml-2 text-green-500 text-sm">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" />
+                                        <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" />
                                     </svg>
-                                    <span class="ml-1">+2 new</span>
+                                    <span class="ml-1">+<span id="new-admins-count">0</span> new</span>
                                 </div>
                             </div>
                         </div>
@@ -199,7 +273,7 @@
                         <div>
                             <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Total PCs</h3>
                             <div class="flex items-center mt-2">
-                                <div class="text-3xl font-bold text-gray-900">24</div>
+                                <div class="text-3xl font-bold text-gray-900" id="total-pcs-count">24</div>
                                 <div class="flex items-center ml-2 text-purple-500 text-sm">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
@@ -229,15 +303,10 @@
             <div class="bg-white rounded-lg shadow">
                 <div class="p-6 border-b border-gray-200 flex justify-between items-center">
                     <h2 class="text-xl font-semibold">Site Management</h2>
-                    <!-- <div class="flex space-x-2">
-                        <input type="text" placeholder="Search site..."
-                            class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                        <button
-                            class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Filter</button>
-                    </div> -->
                 </div>
                 <div class="p-6">
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto scrollbar-hide">
+                        <div class="max-h-[230px] overflow-y-auto scrollbar-hide">
                         <table class="min-w-full divide-y divide-gray-200" id="site-table">
                             <thead>
                                 <tr>
@@ -252,176 +321,10 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
-                                <!-- First Row - Research Center -->
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div
-                                                class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                                </svg>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">Research Center</div>
-                                                <div class="text-sm text-gray-500">ID: SITE003</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">789 Innovation Hub</div>
-                                        <div class="text-sm text-gray-500">Boston, MA 02110</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div
-                                                class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                                                <span class="text-sm font-medium text-gray-600">SL</span>
-                                            </div>
-                                            <div class="ml-3">
-                                                <div class="text-sm font-medium text-gray-900">Sarah Lee</div>
-                                                <div class="text-sm text-gray-500">sarah@example.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <div class="flex space-x-3">
-                                            <button class="text-indigo-600 hover:text-indigo-900 transition-colors">
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                </svg>
-                                            </button>
-                                            <button class="text-red-600 hover:text-red-900 transition-colors">
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div
-                                                class="flex-shrink-0 h-10 w-10 bg-red-100 rounded-lg flex items-center justify-center">
-                                                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                                </svg>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">NeuraSync Research Center
-                                                </div>
-                                                <div class="text-sm text-gray-500">ID: SITE003</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">69, Lust street, Hell</div>
-                                        <div class="text-sm text-gray-500">Silver City, SC 02110</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div
-                                                class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                                                <span class="text-sm font-medium text-gray-600">RJ</span>
-                                            </div>
-                                            <div class="ml-3">
-                                                <div class="text-sm font-medium text-gray-900">Phoeneix sittu</div>
-                                                <div class="text-sm text-gray-500">mabasham52@gmail.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <div class="flex space-x-3">
-                                            <button class="text-indigo-600 hover:text-indigo-900 transition-colors">
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                </svg>
-                                            </button>
-                                            <button class="text-red-600 hover:text-red-900 transition-colors">
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Second Row - Distribution Center -->
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div
-                                                class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                                </svg>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">Distribution Center</div>
-                                                <div class="text-sm text-gray-500">ID: SITE004</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">567 Logistics Way</div>
-                                        <div class="text-sm text-gray-500">Chicago, IL 60601</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <button id="add-admin-btn-2"
-                                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2">
-                                            <svg class="w-5 h-5 md:mr-2" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
-                                            <span class="hidden md:inline">Add Admin</span>
-                                        </button>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <div class="flex space-x-3">
-                                            <button class="text-indigo-600 hover:text-indigo-900 transition-colors">
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                </svg>
-                                            </button>
-                                            <button class="text-red-600 hover:text-red-900 transition-colors">
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <!-- Dynamic data will be inserted here by JavaScript -->
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -526,6 +429,7 @@
         </div>
         <script type="text/javascript" src="../assets/js/api.js"></script>
         <script src="../assets/js/orgAdminDashboard.js"></script>
+    </div>
 </body>
 
 </html>

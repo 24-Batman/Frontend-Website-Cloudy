@@ -1,8 +1,156 @@
 // Global variables
+const token = getSessionToken();
 let meterData = [];
 let currentPage = 1;
 let pageSize = 10;
 let globalMeterId = null;
+
+// Initialize when document loads
+document.addEventListener('DOMContentLoaded', () => {
+    fetchMeterList();
+    setupEventListeners();
+});
+
+async function fetchMeterList() {
+    try {
+        const response = await fetch(API_URLS.getMeterList, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ dummy: null })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to fetch meter list');
+        }
+
+        updateMeterTable(data);
+        updateMeterCount(data);
+
+    } catch (error) {
+        console.error('Error fetching meter list:', error);
+        showToast('Error loading meter data', toastTypes.ERROR);
+        showNoMetersMessage();
+    }
+}
+
+function updateMeterTable(data) {
+    const tableBody = document.querySelector('#meter-table tbody');
+    if (!tableBody) return;
+
+    // Clear existing rows
+    tableBody.innerHTML = '';
+
+    // Check if meter list exists and has items
+    if (!data.meterList || data.meterList.length === 0) {
+        showNoMetersMessage();
+        return;
+    }
+
+    // Update table with meter data
+    data.meterList.forEach(meter => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 transition-colors';
+        row.setAttribute('data-meter-id', meter.meterId || 'N/A');
+
+        const healthStatus = meter.meterHealthStatus || 'Unknown';
+        const statusClass = getStatusClass(healthStatus);
+
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">${meter.meterNum || 'N/A'}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">${meter.meterName || 'N/A'}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">${meter.make || 'N/A'}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">${meter.kwAvg || '0'}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">${meter.nRec || '0'}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="${statusClass}">
+                    ${healthStatus}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <div class="flex space-x-3">
+                    <button class="text-indigo-600 hover:text-indigo-900 transition-colors view-meter-btn">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function getStatusClass(status) {
+    const statusClasses = {
+        'Healthy': 'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800',
+        'Warning': 'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800',
+        'Critical': 'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800',
+        'Unknown': 'px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800'
+    };
+    return statusClasses[status] || statusClasses['Unknown'];
+}
+
+function showNoMetersMessage() {
+    const tableBody = document.querySelector('#meter-table tbody');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center justify-center space-y-3">
+                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p class="text-gray-500 text-lg font-medium">No meters available yet</p>
+                    <p class="text-gray-400 text-sm">Meters will appear here once they are added to the system</p>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+function updateMeterCount(data) {
+    const totalMetersElement = document.querySelector('.text-3xl.font-bold.text-gray-900');
+    if (totalMetersElement) {
+        const meterCount = data.meterList?.length || 0;
+        totalMetersElement.textContent = meterCount;
+        
+        // Update the status message below the count
+        const statusElement = document.querySelector('.inline-flex.items-center.px-2\\.5.py-0\\.5.rounded-full');
+        if (statusElement) {
+            if (meterCount > 0) {
+                statusElement.innerHTML = `
+                    <div class="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                    All Meters Connected
+                `;
+            } else {
+                statusElement.innerHTML = `
+                    <div class="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
+                    No Meters Available
+                `;
+            }
+        }
+    }
+}
 
 // Event listener for analytics button clicks
 document.addEventListener('DOMContentLoaded', () => {
