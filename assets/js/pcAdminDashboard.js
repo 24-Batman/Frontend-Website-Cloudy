@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchMeterList();
         
         // Setup event listeners
-        setupEventListeners();
+    setupEventListeners();
 
     } catch (error) {
         console.error('Initialization error:', error);
