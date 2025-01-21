@@ -105,7 +105,47 @@ window.handleLogout = function() {
     });
 };
 
-// Initialize when document loads
+// Add this function to update profile information
+function updateProfile() {
+    const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+    console.log('User details:', userDetails);
+    
+    if (userDetails) {
+        // Update profile initials
+        const profileInitials = document.getElementById('profile-initials');
+        if (profileInitials) {
+            // Create initials from name (e.g., "John Doe" -> "JD")
+            const initials = userDetails.name
+                .split(' ')
+                .map(word => word[0])
+                .join('')
+                .toUpperCase();
+            profileInitials.textContent = initials || 'PC';
+        }
+
+        // Update profile name
+        const profileName = document.getElementById('profile-name');
+        if (profileName) {
+            profileName.textContent = userDetails.name || 'PC Admin';
+        }
+
+        // Update profile email
+        const profileEmail = document.getElementById('profile-email');
+        if (profileEmail) {
+            profileEmail.textContent = userDetails.email || 'admin@example.com';
+        }
+
+        // Make the profile section visible if it's hidden
+        const profileSection = document.querySelector('.profile-section');
+        if (profileSection && profileSection.classList.contains('hidden')) {
+            profileSection.classList.remove('hidden');
+        }
+    } else {
+        console.error('User details not found in local storage.');
+    }
+}
+
+// Update the initialization code to include profile update
 document.addEventListener('DOMContentLoaded', async () => {
     if (!token) {
         window.location.href = '/login.html';
@@ -116,6 +156,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Initialize controllers
         window.meterModal = new MeterModalController();
         window.pcDropdown = new PCDropdownController();
+
+        // Update profile information
+        updateProfile();
 
         // Setup event listeners for meter view buttons
         document.querySelectorAll('[data-meter-id]').forEach(button => {
@@ -129,9 +172,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         await window.pcDropdown.fetchPCList();
         
         // Initial meter list fetch
-        await fetchMeterList();
+    await fetchMeterList();
         
-        // Setup event listeners for search and other functionality
+        // Setup event listeners
         setupEventListeners();
 
     } catch (error) {
@@ -156,6 +199,29 @@ async function fetchMeterList() {
         
         if (!response.ok) {
             throw new Error(data.message || 'Failed to fetch meter list');
+        }
+
+        // Update Current PC card with pcID and pcName from API response
+        if (data.pcID || data.pcName) {
+            const selectedPc = document.getElementById('selected-pc');
+            if (selectedPc) {
+                // Use pcName if available, otherwise use "PC" + pcID
+                selectedPc.textContent = data.pcName || `PC${data.pcID}`;
+                
+                // Store the current PC ID
+                window.pcDropdown.currentPcId = data.pcID?.toString();
+
+                // Add active status indicator
+                const statusIndicator = document.querySelector('.Current-PC-Card .status-indicator');
+                if (statusIndicator) {
+                    statusIndicator.innerHTML = `
+                        <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                            <div class="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
+                            Active
+                        </div>
+                    `;
+                }
+            }
         }
 
         updateMeterTable(data);
@@ -283,8 +349,8 @@ function setupEventListeners() {
     const rowsPerPageSelect = document.getElementById('rows-per-page');
     if (rowsPerPageSelect) {
         rowsPerPageSelect.addEventListener('change', function() {
-            pageSize = parseInt(this.value);
-            currentPage = 1;
+        pageSize = parseInt(this.value);
+        currentPage = 1;
             if (window.meterModal) {
                 window.meterModal.renderTable(currentPage);
                 window.meterModal.setupPagination();
@@ -293,7 +359,7 @@ function setupEventListeners() {
     }
 
     // Add event listener for filter button
-    const filterBtn = document.querySelector('button:has(i.bx-filter)');
+        const filterBtn = document.querySelector('button:has(i.bx-filter)');
     if (filterBtn) {
         filterBtn.addEventListener('click', async () => {
             const startDate = document.getElementById('start-date')?.value;
@@ -301,63 +367,63 @@ function setupEventListeners() {
 
             if (!startDate && (!timeRange || timeRange === 'none')) {
                 showToast('Please select either a specific date or a time range', toastTypes.WARNING);
-                return;
-            }
+            return;
+        }
 
             try {
-                filterBtn.disabled = true;
-                filterBtn.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Filtering...
-                `;
+        filterBtn.disabled = true;
+        filterBtn.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Filtering...
+        `;
 
                 await window.meterModal?.fetchMeterData();
                 showToast('Data filtered successfully!', toastTypes.SUCCESS);
 
-            } catch (error) {
-                console.error('Filter failed:', error);
+        } catch (error) {
+            console.error('Filter failed:', error);
                 showToast('Failed to filter data', toastTypes.ERROR);
-            } finally {
-                filterBtn.disabled = false;
-                filterBtn.innerHTML = `
-                    <i class='bx bx-filter'></i>
-                    Apply Filter
-                `;
-            }
-        });
+        } finally {
+            filterBtn.disabled = false;
+            filterBtn.innerHTML = `
+                <i class='bx bx-filter'></i>
+                Apply Filter
+            `;
+        }
+    });
     }
 
     // Add export button event listener
-    const exportBtn = document.querySelector('button:has(i.bx-export)');
+        const exportBtn = document.querySelector('button:has(i.bx-export)');
     if (exportBtn) {
         exportBtn.addEventListener('click', async () => {
             try {
-                exportBtn.disabled = true;
-                exportBtn.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Exporting...
-                `;
+        exportBtn.disabled = true;
+        exportBtn.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Exporting...
+        `;
 
                 await exportTableData();
                 showToast('Data exported successfully!', toastTypes.SUCCESS);
 
-            } catch (error) {
-                console.error('Export failed:', error);
+        } catch (error) {
+            console.error('Export failed:', error);
                 showToast('Failed to export data', toastTypes.ERROR);
-            } finally {
-                exportBtn.disabled = false;
-                exportBtn.innerHTML = `
-                    <i class='bx bx-export'></i>
-                    Export Data
-                `;
-            }
-        });
+        } finally {
+            exportBtn.disabled = false;
+            exportBtn.innerHTML = `
+                <i class='bx bx-export'></i>
+                Export Data
+            `;
+        }
+    });
     }
 }
 
@@ -709,7 +775,7 @@ class PCDropdownController {
 
     setupEventListeners() {
         // PC Selection Button
-        const selectBtn = document.getElementById('pc-select-btn');
+    const selectBtn = document.getElementById('pc-select-btn');
         const modal = document.getElementById('pc-selection-modal');
         const closeBtn = document.getElementById('close-pc-modal');
         const searchInput = document.getElementById('pc-search');
@@ -802,8 +868,8 @@ class PCDropdownController {
                 <div class="flex flex-col items-center justify-center py-4 text-gray-500">
                     <i class='bx bx-search-alt-2 text-3xl mb-2'></i>
                     <p class="text-sm">No PCs found</p>
-                </div>
-            `;
+        </div>
+    `;
             return;
         }
 
@@ -925,8 +991,8 @@ class MeterModalController {
         }
 
         this.currentMeterId = meterId;
-        
-        // Show modal and overlay
+    
+    // Show modal and overlay
         DOM.meterModal.container()?.classList.remove('hidden');
         DOM.meterModal.overlay()?.classList.remove('hidden');
         
@@ -952,28 +1018,28 @@ class MeterModalController {
         try {
             this.showLoadingState();
 
-            const response = await fetch(API_URLS.getMeterData, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+        const response = await fetch(API_URLS.getMeterData, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
                 body: JSON.stringify({
                     meterId: this.currentMeterId,
                     pageSize: this.pageSize,
                     pageNumber: this.currentPage
                 })
             });
-
-            if (!response.ok) {
+        
+        if (!response.ok) {
                 throw new Error('Failed to fetch meter data');
             }
 
             const data = await response.json();
             this.meterData = data.meterData || [];
             this.renderMeterData();
-        } catch (error) {
-            console.error('Error fetching meter data:', error);
+    } catch (error) {
+        console.error('Error fetching meter data:', error);
             this.showErrorState(error.message);
         }
     }
@@ -1093,7 +1159,7 @@ class MeterModalController {
             <div class="flex flex-col items-center justify-center p-8 text-gray-500">
                 <i class='bx bx-data text-4xl mb-2'></i>
                 <p class="text-lg font-medium">No meter data available</p>
-            </div>
+                        </div>
         `;
     }
 

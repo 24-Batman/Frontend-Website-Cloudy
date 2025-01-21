@@ -113,6 +113,21 @@
                     </a>
                 </li>
             </ul>
+
+            <!-- Profile Section -->
+            <div class="profile-section absolute bottom-0 left-0 w-full p-4 border-t border-indigo-700">
+                <div class="flex items-center space-x-3 text-white">
+                    <div class="flex-shrink-0">
+                        <div class="profile-avatar w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center">
+                            <span class="text-lg font-semibold" id="profile-initials">PC</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="profile-info-name text-sm font-medium truncate" id="profile-name">PC Admin</p>
+                        <p class="profile-info-email text-xs text-indigo-300 truncate" id="profile-email">admin@example.com</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </aside>
 
@@ -200,8 +215,8 @@
                     </div>
                 </div>
 
-                <!-- Current PC Card with Better Selection -->
-                <div class="bg-white rounded-2xl shadow-lg p-4 transform hover:scale-105 transition-transform duration-300">
+                <!-- Current PC Card -->
+                <div class="bg-white rounded-2xl shadow-lg p-4 transform hover:scale-105 transition-transform duration-300 Current-PC-Card">
                     <div class="flex flex-col h-full">
                         <div class="flex items-center justify-between mb-3">
                             <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Current PC</h3>
@@ -213,7 +228,6 @@
                             </div>
                         </div>
                         
-                        <!-- New PC Selection Component -->
                         <div class="flex-grow">
                             <div class="relative">
                                 <!-- PC Selection Button -->
@@ -221,7 +235,6 @@
                                     class="w-full flex items-center justify-between gap-2 px-3 py-2 text-lg font-bold text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200">
                                     <div class="flex items-center gap-2 min-w-0">
                                         <span id="selected-pc" class="truncate">Select PC</span>
-                                        <span class="flex-shrink-0 text-xs px-2 py-1 bg-purple-100 text-purple-600 rounded-full">Active</span>
                                     </div>
                                     <i class='bx bx-chevron-down text-xl text-gray-500'></i>
                                 </button>
@@ -259,7 +272,7 @@
                             </div>
                         </div>
                         
-                        <div class="mt-3">
+                        <div class="mt-3 status-indicator">
                             <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
                                 <div class="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
                                 No issues found
