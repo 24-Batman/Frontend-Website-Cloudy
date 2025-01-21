@@ -311,7 +311,7 @@ document.getElementById('add-organization-form')?.addEventListener('submit', asy
             showToast(`Organization ${isEdit ? 'updated' : 'created'} successfully!`, toastTypes.SUCCESS);
             closeAddOrgModal();
             fetchOrganizationsData(); // Refresh the table
-        } else {
+    } else {
             throw new Error(data.message || `Failed to ${isEdit ? 'update' : 'create'} organization`);
         }
     } catch (error) {
@@ -427,9 +427,9 @@ function renderPCRequests(pcList) {
                             <div class="flex items-center space-x-3">
                                 <div class="flex-shrink-0">
                                     <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                        <i class='bx bx-desktop text-indigo-600 text-xl'></i>
-                                    </div>
-                                </div>
+                        <i class='bx bx-desktop text-indigo-600 text-xl'></i>
+                    </div>
+                </div>
                                 <div>
                                     <h4 class="text-lg font-medium text-gray-900">${pc.pcName || pc.name || 'Unnamed PC'}</h4>
                                     <p class="text-sm text-gray-500">${pc.orgName || 'Organization not specified'}</p>
@@ -457,25 +457,25 @@ function renderPCRequests(pcList) {
                                 <p class="text-gray-500 mb-1">Role</p>
                                 <p class="font-medium text-gray-900">${pc.creatorRole || 'Not Specified'}</p>
                             </div>
-                        </div>
+                    </div>
 
                         <div class="bg-gray-50 -mx-4 -mb-4 px-4 py-3">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-2 text-sm text-gray-500">
                                     <i class='bx bx-chip'></i>
                                     <span>${pc.pcMacAddress || 'MAC Address not available'}</span>
-                                </div>
+                    </div>
                                 <div class="flex space-x-2">
                                     <button onclick="handlePCAction(${pc.pcId}, true)"
                                         class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                                         <i class='bx bx-check mr-1.5'></i>
                                         Approve
-                                    </button>
+                        </button>
                                     <button onclick="handlePCAction(${pc.pcId}, false)"
                                         class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                                         <i class='bx bx-x mr-1.5'></i>
                                         Reject
-                                    </button>
+                        </button>
                                 </div>
                             </div>
                         </div>
@@ -512,22 +512,22 @@ async function handlePCAction(pcId, isApproved) {
         }
 
         const response = await fetch(API_URLS.approvePc, {
-            method: 'POST',
-            headers: {
+        method: 'POST',
+        headers: {
                 'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
+            'Content-Type': 'application/json'
+        },
             body: JSON.stringify({
                 "pcId": pcId,
                 "status": isApproved ? "Approve" : "Reject"
             })
-        });
+    });
 
         if (!response.ok) {
             throw new Error(`Server error: ${response.status}`);
         }
 
-        const result = await response.json();
+    const result = await response.json();
         console.log('PC action result:', result); // For debugging
         
         // Check for both approve and reject success conditions

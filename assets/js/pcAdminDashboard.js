@@ -8,18 +8,32 @@ let globalMeterId = null;
 // Constants
 const PAGE_SIZE = 10; // Items per page for pagination
 
-// DOM Elements
+// Constants and Types
+const UI_STATE = {
+    LOADING: 'loading',
+    SUCCESS: 'success',
+    ERROR: 'error'
+};
+
+// DOM Elements - Centralized selectors
 const DOM = {
     tableBody: () => document.querySelector('#meter-table tbody'),
-    modal: () => document.getElementById('meter-modal'),
-    overlay: () => document.getElementById('overlay'),
-    closeModalBtn: () => document.getElementById('close-modal-btn'),
-    paginationInfo: () => document.getElementById('modal-pagination-info'),
-    paginationContainer: () => document.getElementById('modal-pagination'),
-    pcSelectBtn: () => document.getElementById('pc-select-btn'),
-    pcOptionsPanel: () => document.getElementById('pc-options-panel'),
-    pcOptionsList: () => document.getElementById('pc-options-list'),
-    selectedPcText: () => document.getElementById('selected-pc')
+    meterModal: {
+        container: () => document.getElementById('meter-modal'),
+        table: () => document.getElementById('modal-meter-table'),
+        closeBtn: () => document.getElementById('close-meter-modal-btn'),
+        pagination: () => document.getElementById('modal-pagination'),
+        paginationInfo: () => document.getElementById('modal-pagination-info'),
+        overlay: () => document.getElementById('overlay')
+    },
+    pcSelection: {
+        button: () => document.getElementById('pc-select-btn'),
+        modal: () => document.getElementById('pc-selection-modal'),
+        closeBtn: () => document.getElementById('close-pc-modal'),
+        list: () => document.getElementById('pc-options-list'),
+        selectedText: () => document.getElementById('selected-pc'),
+        searchInput: () => document.getElementById('pc-search')
+    }
 };
 
 // Function to get session token from cookies
@@ -46,13 +60,12 @@ const toastTypes = {
 
 function showToast(message, type = toastTypes.INFO) {
     const toast = document.createElement('div');
-    toast.className = `fixed right-4 p-4 rounded-lg text-white ${
+    toast.className = `fixed right-4 top-4 p-4 rounded-lg text-white ${
         type === toastTypes.SUCCESS ? 'bg-green-500' :
         type === toastTypes.ERROR ? 'bg-red-500' :
         type === toastTypes.WARNING ? 'bg-yellow-500' : 'bg-blue-500'
     } transition-all duration-300 ease-in-out z-50`;
     
-    toast.style.top = '1rem';
     toast.textContent = message;
     document.body.appendChild(toast);
     
@@ -98,10 +111,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = '/login.html';
         return;
     }
-    
-    await fetchMeterList();
-    setupEventListeners();
-    setupPcSelector();
+
+    try {
+        // Initialize controllers
+        window.meterModal = new MeterModalController();
+        window.pcDropdown = new PCDropdownController();
+
+        // Setup event listeners for meter view buttons
+        document.querySelectorAll('[data-meter-id]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const meterId = e.currentTarget.dataset.meterId;
+                window.meterModal.openModal(meterId);
+            });
+        });
+
+        // Initial data fetch
+        await window.pcDropdown.fetchPCList();
+        
+        // Initial meter list fetch
+        await fetchMeterList();
+        
+        // Setup event listeners for search and other functionality
+        setupEventListeners();
+
+    } catch (error) {
+        console.error('Initialization error:', error);
+        showToast('Failed to initialize dashboard', toastTypes.ERROR);
+    }
 });
 
 async function fetchMeterList() {
@@ -243,160 +279,86 @@ function setupEventListeners() {
         });
     }
 
-    // Add click event listener to the meter table
-    document.querySelector('#meter-table tbody').addEventListener('click', async (e) => {
-        const row = e.target.closest('tr');
-        if (row) {
-            const meterId = row.getAttribute('data-meter-id');
-            if (meterId) {
-                globalMeterId = meterId;
-                const meterName = row.querySelector('td:nth-child(2)').textContent.trim();
-                
-                // Update modal header
-                document.getElementById('modal-meter-num').textContent = `Meter Num: ${meterId}`;
-                document.getElementById('modal-meter-name').textContent = `Meter Name: ${meterName}`;
-                
-                // Show modal
-                document.getElementById('meter-modal').classList.remove('hidden');
-                
-                // Generate and display sample data
-                meterData = generateSampleData();
-                renderTable(1);
-                setupPagination();
-            }
-        }
-    });
-
     // Add event listener for rows per page change
-    document.getElementById('rows-per-page').addEventListener('change', function() {
-        pageSize = parseInt(this.value);
-        currentPage = 1;
-        renderTable(currentPage);
-        setupPagination();
-    });
-
-    // Add event listener for modal close button
-    document.getElementById('close-meter-modal-btn').addEventListener('click', () => {
-        document.getElementById('meter-modal').classList.add('hidden');
-        globalMeterId = null;
-    });
+    const rowsPerPageSelect = document.getElementById('rows-per-page');
+    if (rowsPerPageSelect) {
+        rowsPerPageSelect.addEventListener('change', function() {
+            pageSize = parseInt(this.value);
+            currentPage = 1;
+            if (window.meterModal) {
+                window.meterModal.renderTable(currentPage);
+                window.meterModal.setupPagination();
+            }
+        });
+    }
 
     // Add event listener for filter button
-    document.getElementById('filter-btn')?.addEventListener('click', () => {
-        const startDate = document.getElementById('start-date').value;
-        const endDate = document.getElementById('end-date').value;
-        const timeRange = document.getElementById('time-range').value;
-        fetchMeterData(startDate, endDate, timeRange);
-    });
+    const filterBtn = document.querySelector('button:has(i.bx-filter)');
+    if (filterBtn) {
+        filterBtn.addEventListener('click', async () => {
+            const startDate = document.getElementById('start-date')?.value;
+            const timeRange = document.getElementById('time-range')?.value;
 
-    // Add filter button event listener
-    document.querySelector('button:has(i.bx-filter)').addEventListener('click', async () => {
-        const filterBtn = document.querySelector('button:has(i.bx-filter)');
-        const startDate = document.getElementById('start-date').value;
-        const timeRange = document.getElementById('time-range').value;
+            if (!startDate && (!timeRange || timeRange === 'none')) {
+                showToast('Please select either a specific date or a time range', toastTypes.WARNING);
+                return;
+            }
 
-        // Validate that at least one filter is selected
-        if (!startDate && timeRange === 'none') {
-            alert('Please select either a specific date or a time range');
-            return;
-        }
+            try {
+                filterBtn.disabled = true;
+                filterBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Filtering...
+                `;
 
-        // Show loading state
-        filterBtn.disabled = true;
-        filterBtn.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Filtering...
-        `;
+                await window.meterModal?.fetchMeterData();
+                showToast('Data filtered successfully!', toastTypes.SUCCESS);
 
-        try {
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 800));
-            
-            // Filter the data
-            const filteredData = filterData(startDate, timeRange);
-            meterData = filteredData;
-            currentPage = 1;
-            
-            // Update the table and pagination
-            renderTable(currentPage);
-            setupPagination();
-
-            // Show success message
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500';
-            toast.textContent = 'Data filtered successfully!';
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-
-        } catch (error) {
-            console.error('Filter failed:', error);
-            alert('Failed to filter data. Please try again.');
-        } finally {
-            // Reset button state
-            filterBtn.disabled = false;
-            filterBtn.innerHTML = `
-                <i class='bx bx-filter'></i>
-                Apply Filter
-            `;
-        }
-    });
+            } catch (error) {
+                console.error('Filter failed:', error);
+                showToast('Failed to filter data', toastTypes.ERROR);
+            } finally {
+                filterBtn.disabled = false;
+                filterBtn.innerHTML = `
+                    <i class='bx bx-filter'></i>
+                    Apply Filter
+                `;
+            }
+        });
+    }
 
     // Add export button event listener
-    document.querySelector('button:has(i.bx-export)').addEventListener('click', async () => {
-        const exportBtn = document.querySelector('button:has(i.bx-export)');
-        
-        // Show loading state
-        exportBtn.disabled = true;
-        exportBtn.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Exporting...
-        `;
+    const exportBtn = document.querySelector('button:has(i.bx-export)');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+            try {
+                exportBtn.disabled = true;
+                exportBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Exporting...
+                `;
 
-        try {
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 800));
-            
-            // Export the data
-            exportTableData();
+                await exportTableData();
+                showToast('Data exported successfully!', toastTypes.SUCCESS);
 
-            // Show success message
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500';
-            toast.textContent = 'Data exported successfully!';
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-
-        } catch (error) {
-            console.error('Export failed:', error);
-            alert('Failed to export data. Please try again.');
-        } finally {
-            // Reset button state
-            exportBtn.disabled = false;
-            exportBtn.innerHTML = `
-                <i class='bx bx-export'></i>
-                Export Data
-            `;
-        }
-    });
-
-    // Add close button event listener
-    document.getElementById('close-modal-btn')?.addEventListener('click', closeMeterModal);
-    
-    // Add close on overlay click
-    document.getElementById('overlay')?.addEventListener('click', closeMeterModal);
-    
-    // Add escape key listener
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeMeterModal();
-        }
-    });
+            } catch (error) {
+                console.error('Export failed:', error);
+                showToast('Failed to export data', toastTypes.ERROR);
+            } finally {
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = `
+                    <i class='bx bx-export'></i>
+                    Export Data
+                `;
+            }
+        });
+    }
 }
 
 function generateSampleData() {
@@ -734,3 +696,418 @@ function exportTableData() {
         alert('Failed to export data. Please try again.');
     }
 }
+
+// PC Dropdown Controller
+class PCDropdownController {
+    constructor() {
+        this.isOpen = false;
+        this.currentPcId = null;
+        this.pcList = [];
+        this.filteredPcList = [];
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        // PC Selection Button
+        const selectBtn = document.getElementById('pc-select-btn');
+        const modal = document.getElementById('pc-selection-modal');
+        const closeBtn = document.getElementById('close-pc-modal');
+        const searchInput = document.getElementById('pc-search');
+
+        selectBtn?.addEventListener('click', () => this.openModal());
+        closeBtn?.addEventListener('click', () => this.closeModal());
+        
+        // Close modal on outside click
+        modal?.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeModal();
+            }
+        });
+
+        // Search functionality
+        searchInput?.addEventListener('input', (e) => {
+            this.filterPCs(e.target.value);
+        });
+
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isOpen) {
+                this.closeModal();
+            }
+        });
+    }
+
+    openModal() {
+        const modal = document.getElementById('pc-selection-modal');
+        modal?.classList.remove('hidden');
+        this.isOpen = true;
+        
+        // Focus search input
+        const searchInput = document.getElementById('pc-search');
+        searchInput?.focus();
+    }
+
+    closeModal() {
+        const modal = document.getElementById('pc-selection-modal');
+        modal?.classList.add('hidden');
+        this.isOpen = false;
+        
+        // Clear search
+        const searchInput = document.getElementById('pc-search');
+        if (searchInput) {
+            searchInput.value = '';
+            this.filterPCs('');
+        }
+    }
+
+    async fetchPCList() {
+        try {
+            const response = await fetch(API_URLS.getPcList, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ dummy: null })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch PC list');
+            }
+
+            const data = await response.json();
+            this.pcList = data.pcList || [];
+            this.filteredPcList = [...this.pcList];
+            this.renderPCOptions();
+        } catch (error) {
+            console.error('Error fetching PC list:', error);
+            showToast('Failed to load PC list', toastTypes.ERROR);
+        }
+    }
+
+    filterPCs(query) {
+        const searchTerm = query.toLowerCase();
+        this.filteredPcList = this.pcList.filter(pc => 
+            pc.pcName.toLowerCase().includes(searchTerm)
+        );
+        this.renderPCOptions();
+    }
+
+    renderPCOptions() {
+        const listElement = document.getElementById('pc-options-list');
+        if (!listElement) return;
+
+        if (this.filteredPcList.length === 0) {
+            listElement.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-4 text-gray-500">
+                    <i class='bx bx-search-alt-2 text-3xl mb-2'></i>
+                    <p class="text-sm">No PCs found</p>
+                </div>
+            `;
+            return;
+        }
+
+        listElement.innerHTML = this.filteredPcList.map(pc => `
+            <button class="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center justify-between rounded-lg transition-colors ${
+                this.currentPcId === pc.pcId ? 'bg-purple-50 text-purple-600' : 'text-gray-700'
+            }" data-pc-id="${pc.pcId}">
+                <div class="flex items-center gap-3">
+                    <i class='bx bx-desktop text-xl ${
+                        this.currentPcId === pc.pcId ? 'text-purple-600' : 'text-gray-400'
+                    }'></i>
+                    <div class="flex flex-col">
+                        <span class="font-medium">${pc.pcName}</span>
+                        <span class="text-xs text-gray-500">Last active: 2 hours ago</span>
+                    </div>
+                </div>
+                ${this.currentPcId === pc.pcId ? 
+                    '<i class="bx bx-check text-purple-600 text-xl"></i>' : 
+                    ''}
+            </button>
+        `).join('');
+
+        // Add click event listeners to options
+        listElement.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const pcId = e.currentTarget.dataset.pcId;
+                const pc = this.pcList.find(p => p.pcId === pcId);
+                if (pc) {
+                    this.selectPC(pc.pcId, pc.pcName);
+                }
+            });
+        });
+
+        // Update selected PC text if there's a current PC
+        if (this.currentPcId) {
+            const currentPC = this.pcList.find(pc => pc.pcId === this.currentPcId);
+            const selectedText = document.getElementById('selected-pc');
+            if (currentPC && selectedText) {
+                selectedText.textContent = currentPC.pcName;
+            }
+        }
+    }
+
+    selectPC(pcId, pcName) {
+        this.currentPcId = pcId;
+        const selectedText = document.getElementById('selected-pc');
+        if (selectedText) {
+            selectedText.textContent = pcName;
+        }
+        this.closeModal();
+        this.fetchMeterList(pcId); // Fetch meters for selected PC
+
+        // Show success toast
+        showToast(`Switched to ${pcName}`, toastTypes.SUCCESS);
+    }
+
+    async fetchMeterList(pcId) {
+        try {
+            const response = await fetch(API_URLS.getMeterList, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ pcId })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch meter list');
+            }
+
+            const data = await response.json();
+            updateMeterTable(data);
+            updateDashboardStats(data);
+        } catch (error) {
+            console.error('Error fetching meter list:', error);
+            showToast('Failed to load meters', toastTypes.ERROR);
+        }
+    }
+}
+
+// Meter Modal Controller
+class MeterModalController {
+    constructor() {
+        this.currentMeterId = null;
+        this.meterData = [];
+        this.currentPage = 1;
+        this.pageSize = 10;
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        // Close button click
+        DOM.meterModal.closeBtn()?.addEventListener('click', () => this.closeModal());
+
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isModalOpen()) {
+                this.closeModal();
+            }
+        });
+
+        // Close on overlay click
+        DOM.meterModal.container()?.addEventListener('click', (e) => {
+            if (e.target === DOM.meterModal.container()) {
+                this.closeModal();
+            }
+        });
+    }
+
+    isModalOpen() {
+        return !DOM.meterModal.container()?.classList.contains('hidden');
+    }
+
+    async openModal(meterId) {
+        if (!meterId) {
+            showToast('Invalid meter ID', toastTypes.ERROR);
+            return;
+        }
+
+        this.currentMeterId = meterId;
+        
+        // Show modal and overlay
+        DOM.meterModal.container()?.classList.remove('hidden');
+        DOM.meterModal.overlay()?.classList.remove('hidden');
+        
+        // Reset state
+        this.currentPage = 1;
+        this.meterData = [];
+        
+        // Fetch data
+        await this.fetchMeterData();
+    }
+
+    closeModal() {
+        // Hide modal and overlay
+        DOM.meterModal.container()?.classList.add('hidden');
+        DOM.meterModal.overlay()?.classList.add('hidden');
+        
+        // Reset state
+        this.currentMeterId = null;
+        this.meterData = [];
+    }
+
+    async fetchMeterData() {
+        try {
+            this.showLoadingState();
+
+            const response = await fetch(API_URLS.getMeterData, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    meterId: this.currentMeterId,
+                    pageSize: this.pageSize,
+                    pageNumber: this.currentPage
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch meter data');
+            }
+
+            const data = await response.json();
+            this.meterData = data.meterData || [];
+            this.renderMeterData();
+        } catch (error) {
+            console.error('Error fetching meter data:', error);
+            this.showErrorState(error.message);
+        }
+    }
+
+    showLoadingState() {
+        const table = DOM.meterModal.table();
+        if (!table) return;
+        
+        table.innerHTML = `
+            <div class="flex items-center justify-center p-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                <span class="ml-3 text-gray-600">Loading meter data...</span>
+            </div>
+        `;
+    }
+
+    showErrorState(message) {
+        const table = DOM.meterModal.table();
+        if (!table) return;
+
+        table.innerHTML = `
+            <div class="flex flex-col items-center justify-center p-8 text-red-600">
+                <i class='bx bx-error-circle text-4xl mb-2'></i>
+                <p class="text-lg font-medium">${message}</p>
+                <button onclick="window.meterModal.fetchMeterData()" 
+                    class="mt-4 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors">
+                    Try Again
+                </button>
+            </div>
+        `;
+    }
+
+    renderMeterData() {
+        const table = DOM.meterModal.table();
+        if (!table || !this.meterData.length) {
+            this.showEmptyState();
+            return;
+        }
+
+        const rows = this.meterData.map((meter, index) => `
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-2 text-sm">${index + 1}</td>
+                <td class="px-4 py-2 text-sm font-medium">${meter.dataCount}</td>
+                <td class="px-4 py-2 text-sm">${meter.timeStamp}</td>
+                <td class="px-4 py-2 text-sm">${meter.v12}</td>
+                <td class="px-4 py-2 text-sm">${meter.v23}</td>
+                <td class="px-4 py-2 text-sm">${meter.v31}</td>
+                <td class="px-4 py-2 text-sm">${meter.i1}</td>
+                <td class="px-4 py-2 text-sm">${meter.i2}</td>
+                <td class="px-4 py-2 text-sm">${meter.i3}</td>
+                <td class="px-4 py-2 text-sm font-medium">${meter.kw}</td>
+                <td class="px-4 py-2 text-sm">${meter.kva}</td>
+                <td class="px-4 py-2 text-sm">${meter.kvar}</td>
+                <td class="px-4 py-2 text-sm">${meter.pf}</td>
+                <td class="px-4 py-2 text-sm">${meter.hz}</td>
+                <td class="px-4 py-2 text-sm font-medium">${meter.kwh}</td>
+                <td class="px-4 py-2 text-sm font-medium">${meter.kvah}</td>
+                <td class="px-4 py-2">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full ${
+                        meter.pFlag === 'Normal' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                    }">
+                        ${meter.pFlag}
+                    </span>
+                </td>
+                <td class="px-4 py-2">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full ${
+                        meter.lFlag === 'Normal' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                    }">
+                        ${meter.lFlag}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+
+        table.innerHTML = `
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Data Count</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time Stamp</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">V12</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">V23</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">V31</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">I1</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">I2</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">I3</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kw</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kva</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kvar</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pf</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Hz</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kwh</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kvah</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">P Flag</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">L Flag</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    ${rows}
+                </tbody>
+            </table>
+        `;
+
+        this.updatePagination();
+    }
+
+    showEmptyState() {
+        const table = DOM.meterModal.table();
+        if (!table) return;
+
+        table.innerHTML = `
+            <div class="flex flex-col items-center justify-center p-8 text-gray-500">
+                <i class='bx bx-data text-4xl mb-2'></i>
+                <p class="text-lg font-medium">No meter data available</p>
+            </div>
+        `;
+    }
+
+    updatePagination() {
+        // Implementation for pagination...
+    }
+}
+
+// Global function for viewing meter details
+window.viewMeterDetails = (meterId) => {
+    window.meterModal.openModal(meterId);
+};
+
+// Global function for closing meter modal
+window.closeMeterModal = () => {
+    window.meterModal?.closeModal();
+};

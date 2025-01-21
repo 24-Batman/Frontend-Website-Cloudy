@@ -410,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             console.log('API Response:', response); // Debug: Check API response
-            
+
             const result = await response.json();
             console.log('API Result:', result); // Debug: Check parsed response
 
