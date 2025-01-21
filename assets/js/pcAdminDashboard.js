@@ -62,8 +62,43 @@ function showToast(message, type = toastTypes.INFO) {
     }, 3000);
 }
 
+// Add these functions at the top level of the file, after the initial constants
+function animateLogout(callback) {
+    const logoutBtn = document.querySelector('button[onclick="handleLogout()"]');
+    if (!logoutBtn) {
+        console.error('Logout button not found');
+        return callback();
+    }
+
+    logoutBtn.innerHTML = `
+        <div class="flex items-center justify-center space-x-2">
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Logging out...</span>
+        </div>
+    `;
+    logoutBtn.disabled = true;
+    setTimeout(callback, 1000);
+}
+
+// Make handleLogout globally available
+window.handleLogout = function() {
+    animateLogout(() => {
+        localStorage.clear();
+        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        window.location.href = '/login.html';
+    });
+};
+
 // Initialize when document loads
 document.addEventListener('DOMContentLoaded', async () => {
+    if (!token) {
+        window.location.href = '/login.html';
+        return;
+    }
+    
     await fetchMeterList();
     setupEventListeners();
     setupPcSelector();
@@ -519,62 +554,6 @@ function setupPagination() {
         
         return pageNumbers;
     };
-    function animateLogout(callback) {
-        const logoutBtn = document.querySelector('button[onclick="handleLogout()"]');
-        if (!logoutBtn) return callback();
-    
-        // Store original button content
-        const originalContent = logoutBtn.innerHTML;
-    
-        // Add spinner and "Logging out..." text
-        logoutBtn.innerHTML = `
-            <div class="flex items-center justify-center space-x-2">
-                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Logging out...</span>
-            </div>
-        `;
-    
-        // Disable the button
-        logoutBtn.disabled = true;
-        
-        // Add required styles dynamically
-        const style = document.createElement('style');
-        style.textContent = `
-            .animate-spin {
-                animation: spin 1s linear infinite;
-            }
-            @keyframes spin {
-                from {
-                    transform: rotate(0deg);
-                }
-                to {
-                    transform: rotate(360deg);
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    
-        // Wait for animation and then execute callback
-        setTimeout(callback, 1000);
-    }
-    
-    function handleLogout() {
-        animateLogout(() => {
-            // Clear localStorage
-            localStorage.removeItem('userDetails');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userPassword');
-            
-            // Clear session cookie
-            document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            
-            // Redirect to login page
-            window.location.href = '/login.html';
-        });
-    }
 
     // Enhanced pagination controls
     const createPageButton = (text, isPage = true, isActive = false, isDisabled = false) => {

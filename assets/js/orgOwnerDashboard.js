@@ -141,21 +141,6 @@ function animateLogout(callback) {
     setTimeout(callback, 1000);
 }
 
-function handleLogout() {
-    animateLogout(() => {
-        // Clear localStorage
-        localStorage.removeItem('userDetails');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('userPassword');
-        
-        // Clear session cookie
-        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        
-        // Redirect to login page
-        window.location.href = '/login.html';
-    });
-}
-
 // Table Rendering
 function renderOrganizationsTable(organizations) {
     const tableBody = document.querySelector('#organizations-table tbody');
@@ -334,78 +319,278 @@ document.getElementById('add-organization-form')?.addEventListener('submit', asy
         showToast(error.message, toastTypes.ERROR);
     }
 });
-// Function to render PC requests
-function renderPCRequests() {
+
+// PC Approval Functions
+async function fetchNotApprovedPCs() {
     const container = document.getElementById('notification-container');
     if (!container) return;
 
-    container.innerHTML = ''; // Clear existing content
-
-    if (pcRequests.length === 0) {
+    try {
+        // Show loading state
         container.innerHTML = `
-            <div class="text-center py-8">
-                <p class="text-gray-500">No pending PC approval requests</p>
+            <div class="flex items-center justify-center py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            </div>
+        `;
+
+        const response = await fetch(API_URLS.getNotApprovedPcList, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ dummy: null })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('PC Requests:', data);
+
+        // Handle the array structure directly
+        if (Array.isArray(data)) {
+            updateNotificationBadge(data.length);
+            renderPCRequests(data);
+        } 
+        // Handle the nested structure
+        else if (data && Array.isArray(data.pcRequests)) {
+            updateNotificationBadge(data.pcRequests.length);
+            renderPCRequests(data.pcRequests);
+        }
+        // Handle the pcList structure
+        else if (data && Array.isArray(data.pcList)) {
+            updateNotificationBadge(data.pcList.length);
+            renderPCRequests(data.pcList);
+        }
+        else {
+            throw new Error('No PC requests data found');
+        }
+    } catch (error) {
+        console.error('Error fetching PC requests:', error);
+        container.innerHTML = `
+            <div class="text-center py-6 px-4">
+                <div class="bg-red-50 rounded-lg p-4 mb-4">
+                    <div class="flex items-center">
+                        <i class='bx bx-error-circle text-3xl text-red-500 mr-3'></i>
+                        <div>
+                            <h3 class="text-lg font-medium text-red-800">Unable to load PC requests</h3>
+                            <p class="text-sm text-red-700 mt-1">${error.message}</p>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="retryFetchPCs()" 
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                    <i class='bx bx-refresh mr-2'></i>
+                    Try Again
+                </button>
+            </div>
+        `;
+    }
+}
+
+function updateNotificationBadge(count) {
+    const badge = document.getElementById('notification-badge');
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'block' : 'none';
+    }
+}
+
+function renderPCRequests(pcList) {
+    const container = document.getElementById('notification-container');
+    if (!container) return;
+
+    // Filter only non-approved PCs
+    const pendingPCs = pcList.filter(pc => !pc.isApproved);
+
+    if (!pendingPCs || pendingPCs.length === 0) {
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-8 px-4">
+                <div class="bg-green-50 rounded-full p-3 mb-4">
+                    <i class='bx bx-check text-4xl text-green-500'></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">All Clear!</h3>
+                <p class="text-sm text-gray-500 mt-1">No pending PC requests to review</p>
             </div>
         `;
         return;
     }
 
-    pcRequests.forEach(request => {
-        const card = document.createElement('div');
-        card.className = 'bg-white rounded-lg shadow p-4 mb-4';
-        card.setAttribute('data-pc-id', request.id); // Add data attribute for identification
+    let html = `
+        <div class="grid gap-4 p-4">
+            ${pendingPCs.map(pc => `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                        <i class='bx bx-desktop text-indigo-600 text-xl'></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-medium text-gray-900">${pc.pcName || pc.name || 'Unnamed PC'}</h4>
+                                    <p class="text-sm text-gray-500">${pc.orgName || 'Organization not specified'}</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Pending
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                            <div>
+                                <p class="text-gray-500 mb-1">Department</p>
+                                <p class="font-medium text-gray-900">${pc.department || 'No Department'}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 mb-1">Site</p>
+                                <p class="font-medium text-gray-900">${pc.siteName || 'Not Specified'}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 mb-1">Created By</p>
+                                <p class="font-medium text-gray-900">${pc.creatorName || 'Unknown'}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 mb-1">Role</p>
+                                <p class="font-medium text-gray-900">${pc.creatorRole || 'Not Specified'}</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 -mx-4 -mb-4 px-4 py-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                    <i class='bx bx-chip'></i>
+                                    <span>${pc.pcMacAddress || 'MAC Address not available'}</span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="handlePCAction(${pc.pcId}, true)"
+                                        class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                        <i class='bx bx-check mr-1.5'></i>
+                                        Approve
+                                    </button>
+                                    <button onclick="handlePCAction(${pc.pcId}, false)"
+                                        class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                        <i class='bx bx-x mr-1.5'></i>
+                                        Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+async function handlePCAction(pcId, isApproved) {
+    try {
+        const actionButton = event.target.closest('button');
+        const originalContent = actionButton.innerHTML;
         
-        card.innerHTML = `
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0">
-                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                        <i class='bx bx-desktop text-indigo-600 text-xl'></i>
-                    </div>
-                </div>
-                <div class="flex-1">
-                    <div class="flex justify-between items-start">
-                        <h4 class="font-medium text-gray-900">New PC Approval Request</h4>
-                        <span class="text-sm text-gray-500">${request.orgName}</span>
-                    </div>
-                    <div class="mt-2 space-y-1 text-sm text-gray-600">
-                        <p class="flex justify-between">
-                            <span class="font-medium">Site:</span>
-                            <span>${request.siteName}</span>
-                        </p>
-                        <p class="flex justify-between">
-                            <span class="font-medium">PC Name:</span>
-                            <span>${request.pcName}</span>
-                        </p>
-                        <p class="flex justify-between">
-                            <span class="font-medium">Added By:</span>
-                            <span>${request.addedBy} (${request.role})</span>
-                        </p>
-                    </div>
-                    <div class="mt-4 flex gap-2">
-                        <button onclick="handlePCAction('${request.id}', 'Approve')" 
-                            class="flex-1 inline-flex justify-center items-center px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300">
-                            <i class='bx bx-check mr-1'></i> Approve
-                        </button>
-                        <button onclick="handlePCAction('${request.id}', 'Reject')" 
-                            class="flex-1 inline-flex justify-center items-center px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200">
-                            <i class='bx bx-x mr-1'></i> Reject
-                        </button>
-                    </div>
-                </div>
+        // Show loading state
+        actionButton.disabled = true;
+        actionButton.innerHTML = `
+            <div class="flex items-center">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-${isApproved ? 'white' : 'gray-700'} mr-2"></div>
+                ${isApproved ? 'Approving...' : 'Rejecting...'}
             </div>
         `;
+
+        // Disable both buttons while processing
+        const pcCard = actionButton.closest('.bg-white');
+        if (pcCard) {
+            const buttons = pcCard.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        const response = await fetch(API_URLS.approvePc, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "pcId": pcId,
+                "status": isApproved ? "Approve" : "Reject"
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('PC action result:', result); // For debugging
         
-        container.appendChild(card);
-    });
+        // Check for both approve and reject success conditions
+        if (result.status === "Pc approved" || 
+            result.status === "Success" || 
+            result.status === "Pc rejected" || 
+            result.message?.toLowerCase().includes('rejected') ||
+            result.message?.toLowerCase().includes('approved')) {
+            
+            showToast(`PC ${isApproved ? 'approved' : 'rejected'} successfully`, toastTypes.SUCCESS);
+            
+            // Remove the PC card with animation
+            if (pcCard) {
+                pcCard.style.transition = 'all 0.5s ease-out';
+                pcCard.style.opacity = '0';
+                pcCard.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    pcCard.remove();
+                    // Check if there are any remaining PC cards
+                    const container = document.getElementById('notification-container');
+                    if (container && !container.querySelector('.bg-white')) {
+                        // No more PCs to approve/reject
+                        container.innerHTML = `
+                            <div class="flex flex-col items-center justify-center py-8 px-4">
+                                <div class="bg-green-50 rounded-full p-3 mb-4">
+                                    <i class='bx bx-check text-4xl text-green-500'></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900">All Clear!</h3>
+                                <p class="text-sm text-gray-500 mt-1">No pending PC requests to review</p>
+                            </div>
+                        `;
+                    }
+                }, 500);
+            }
+
+            // Update notification badge
+            const remainingCards = document.querySelectorAll('#notification-container .bg-white').length - 1;
+            updateNotificationBadge(remainingCards);
+        } else {
+            throw new Error(result.message || `Failed to ${isApproved ? 'approve' : 'reject'} PC`);
+        }
+    } catch (error) {
+        console.error('Error processing PC request:', error);
+        showToast(error.message, toastTypes.ERROR);
+        
+        // Restore button states
+        if (pcCard) {
+            const buttons = pcCard.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                if (btn === actionButton) {
+                    btn.innerHTML = originalContent;
+                }
+            });
+        }
+    }
 }
 
 function showApprovePC() {
     const modal = document.getElementById('approve-pc-card');
     if (modal) {
         modal.classList.remove('hidden');
-        renderPCRequests(); // Ensure this is called to populate the modal
-        updateNotificationCount(); // Update the notification count
-        console.log('Notification count updated:', pcRequests.length); // Debugging line
+        fetchNotApprovedPCs();
     }
 }
 
@@ -416,39 +601,10 @@ function closeApprovePC() {
     }
 }
 
-// Function to handle approve/reject actions
-function handlePCAction(pcId, action) {
-    // Find the request in the pcRequests array
-    const requestIndex = pcRequests.findIndex(req => req.id === pcId);
-    
-    if (requestIndex !== -1) {
-        // Find the notification card element
-        const card = document.querySelector(`[data-pc-id="${pcId}"]`);
-        if (card) {
-            // Add fade-out animation
-            card.style.transition = 'opacity 0.3s ease-out';
-            card.style.opacity = '0';
-            
-            setTimeout(() => {
-                // Remove the request from the array
-                pcRequests.splice(requestIndex, 1);
-                
-                // Re-render the notifications
-                renderPCRequests();
-                
-                // Update notification count
-                updateNotificationCount();
-                
-                // Show appropriate toast message
-                if (action === 'Approve') {
-                    showToast(`PC Request ${pcId} has been approved successfully`, toastTypes.SUCCESS);
-                } else if (action === 'Reject') {
-                    showToast(`PC Request ${pcId} has been rejected`, toastTypes.ERROR);
-                }
-            }, 300);
-        }
-    }
-}
+// Make these functions globally available
+window.showApprovePC = showApprovePC;
+window.closeApprovePC = closeApprovePC;
+window.handlePCAction = handlePCAction;
 
 function updateProfile(){
     const userDetails = JSON.parse(localStorage.getItem('userDetails'));
@@ -482,25 +638,33 @@ function updateProfile(){
 }
 
 // Initialize page
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     if (!token) {
         window.location.href = '/login.html';
         return;
     }
     
-    // Initial data fetch
-    showToast('Loading Dashboard...', toastTypes.INFO);
-    updateProfile();
-    fetchOrganizationsData();
-    renderPCRequests();
-    handleLogout();
-    closeadminmodal();
-
-    // Add event listeners for modal close buttons
-    document.getElementById('close-admin-modal-btn')?.addEventListener('click', closeAssignAdminModal);
+    try {
+        await Promise.all([
+            fetchOrganizationsData(),
+            fetchNotApprovedPCs() // Fetch PC requests on page load
+        ]);
+        updateProfile();
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
+        showToast('Error loading dashboard data', toastTypes.ERROR);
+    }
 });
 
 // Make functions globally available
+window.handleLogout = function() {
+    animateLogout(() => {
+        localStorage.clear();
+        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        window.location.href = '/login.html';
+    });
+};
+
 window.openAssignAdminModal = openAssignAdminModal;
 window.closeAssignAdminModal = closeAssignAdminModal;
 window.openEditOrgModal = openEditOrgModal;
@@ -536,3 +700,11 @@ async function openEditOrgModal(orgId) {
         showToast('Error loading organization details', toastTypes.ERROR);
     }
 }
+
+// Add retry function
+function retryFetchPCs() {
+    fetchNotApprovedPCs();
+}
+
+// Make retry function globally available
+window.retryFetchPCs = retryFetchPCs;
