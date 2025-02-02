@@ -529,7 +529,7 @@ function handleLogout() {
         localStorage.removeItem('userPassword');
         
         // Clear session cookie
-        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 2025 00:00:00 UTC; path=/;';
         
         // Redirect to login page
         window.location.href = '/login.html';

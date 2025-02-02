@@ -331,17 +331,62 @@ function showNoMetersMessage() {
 }
 
 function setupEventListeners() {
-    // Search functionality
-    const searchInput = document.querySelector('input[type="text"]');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#meter-table tbody tr');
+    // Meter search functionality
+    const meterSearchInput = document.getElementById('meter-search');
+    if (meterSearchInput) {
+        meterSearchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            const tableBody = document.querySelector('#meter-table tbody');
+            const rows = tableBody?.querySelectorAll('tr:not(#no-results-message)');
+            
+            if (!rows || rows.length === 0) return;
+            
+            let hasVisibleRows = false;
             
             rows.forEach(row => {
-                const meterName = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase();
-                row.style.display = meterName?.includes(query) ? '' : 'none';
+                const meterNameCell = row.querySelector('td:nth-child(2)');
+                if (!meterNameCell) return;
+                
+                const meterName = meterNameCell.textContent.toLowerCase();
+                const isVisible = meterName.includes(query);
+                
+                row.style.display = isVisible ? '' : 'none';
+                if (isVisible) hasVisibleRows = true;
             });
+            
+            // Handle no results message
+            let noResultsMsg = document.getElementById('no-results-message');
+            if (!hasVisibleRows) {
+                if (!noResultsMsg) {
+                    noResultsMsg = document.createElement('tr');
+                    noResultsMsg.id = 'no-results-message';
+                    noResultsMsg.innerHTML = `
+                        <td colspan="7" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center space-y-3">
+                                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <p class="text-gray-500 text-lg font-medium">No meters found matching "${query}"</p>
+                                <p class="text-gray-400 text-sm">Try adjusting your search term</p>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(noResultsMsg);
+                } else {
+                    noResultsMsg.querySelector('p.text-gray-500').textContent = `No meters found matching "${query}"`;
+                }
+            } else if (noResultsMsg) {
+                noResultsMsg.remove();
+            }
+        });
+    }
+
+    // Search functionality for PC dropdown
+    const searchInput = document.getElementById('pc-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            this.filterPCs(e.target.value);
         });
     }
 
@@ -349,8 +394,8 @@ function setupEventListeners() {
     const rowsPerPageSelect = document.getElementById('rows-per-page');
     if (rowsPerPageSelect) {
         rowsPerPageSelect.addEventListener('change', function() {
-        pageSize = parseInt(this.value);
-        currentPage = 1;
+            pageSize = parseInt(this.value);
+            currentPage = 1;
             if (window.meterModal) {
                 window.meterModal.renderTable(currentPage);
                 window.meterModal.setupPagination();
@@ -359,7 +404,7 @@ function setupEventListeners() {
     }
 
     // Add event listener for filter button
-        const filterBtn = document.querySelector('button:has(i.bx-filter)');
+    const filterBtn = document.querySelector('button:has(i.bx-filter)');
     if (filterBtn) {
         filterBtn.addEventListener('click', async () => {
             const startDate = document.getElementById('start-date')?.value;
@@ -367,63 +412,61 @@ function setupEventListeners() {
 
             if (!startDate && (!timeRange || timeRange === 'none')) {
                 showToast('Please select either a specific date or a time range', toastTypes.WARNING);
-            return;
-        }
+                return;
+            }
 
             try {
-        filterBtn.disabled = true;
-        filterBtn.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Filtering...
-        `;
+                filterBtn.disabled = true;
+                filterBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Filtering...
+                `;
 
                 await window.meterModal?.fetchMeterData();
                 showToast('Data filtered successfully!', toastTypes.SUCCESS);
-
-        } catch (error) {
-            console.error('Filter failed:', error);
+            } catch (error) {
+                console.error('Filter failed:', error);
                 showToast('Failed to filter data', toastTypes.ERROR);
-        } finally {
-            filterBtn.disabled = false;
-            filterBtn.innerHTML = `
-                <i class='bx bx-filter'></i>
-                Apply Filter
-            `;
-        }
-    });
+            } finally {
+                filterBtn.disabled = false;
+                filterBtn.innerHTML = `
+                    <i class='bx bx-filter'></i>
+                    Apply Filter
+                `;
+            }
+        });
     }
 
     // Add export button event listener
-        const exportBtn = document.querySelector('button:has(i.bx-export)');
+    const exportBtn = document.querySelector('button:has(i.bx-export)');
     if (exportBtn) {
         exportBtn.addEventListener('click', async () => {
             try {
-        exportBtn.disabled = true;
-        exportBtn.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Exporting...
-        `;
+                exportBtn.disabled = true;
+                exportBtn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Exporting...
+                `;
 
                 await exportTableData();
                 showToast('Data exported successfully!', toastTypes.SUCCESS);
-
-        } catch (error) {
-            console.error('Export failed:', error);
+            } catch (error) {
+                console.error('Export failed:', error);
                 showToast('Failed to export data', toastTypes.ERROR);
-        } finally {
-            exportBtn.disabled = false;
-            exportBtn.innerHTML = `
-                <i class='bx bx-export'></i>
-                Export Data
-            `;
-        }
-    });
+            } finally {
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = `
+                    <i class='bx bx-export'></i>
+                    Export Data
+                `;
+            }
+        });
     }
 }
 
@@ -1037,6 +1080,7 @@ class MeterModalController {
 
             const data = await response.json();
             this.meterData = data.meterData || [];
+            console.log(this.meterData);
             this.renderMeterData();
     } catch (error) {
         console.error('Error fetching meter data:', error);

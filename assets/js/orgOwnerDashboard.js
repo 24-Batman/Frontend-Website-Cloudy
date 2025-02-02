@@ -708,3 +708,29 @@ function retryFetchPCs() {
 
 // Make retry function globally available
 window.retryFetchPCs = retryFetchPCs;
+
+// Function to delete an organization
+function deleteOrganization(orgId) {
+    if (confirm('Are you sure you want to delete this organization?')) {
+        fetch(`${API_URLS.deleteOrgOwner}/${orgId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast('Organization deleted successfully!', toastTypes.SUCCESS);
+                fetchOrganizationsData(); // Refresh the organization list
+            } else {
+                showToast(data.message || 'Failed to delete organization', toastTypes.ERROR);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting organization:', error);
+            showToast('Error deleting organization', toastTypes.ERROR);
+        });
+    }
+}
