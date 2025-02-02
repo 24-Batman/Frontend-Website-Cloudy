@@ -31,4 +31,7 @@ yarn-error.log*
 
 # Operating System Files
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Don't ignore these files
+!assets/css/tailwind.css 
